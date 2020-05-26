@@ -13,49 +13,6 @@
  *
  */
 
-var Ori = `069.2500   0.0000
-069.2500  15.5000
-074.5000  15.5000
-074.5000  16.0000
-080.0000  16.0000
-080.0000  15.5000
-084.0000  15.5000
-084.0000  12.5000
-086.5000  12.5000
-086.5000  18.0000
-085.5000  18.0000
-085.5000  22.8333
-088.2500  22.8333
-088.2500  21.5000
-093.2500  21.5000
-093.2500  17.5000
-094.6250  17.5000
-094.6250  12.0000
-094.6250  10.0000
-093.6250  10.0000
-093.6250   0.0000
-093.6250  -4.0000
-087.5000  -4.0000
-087.5000 -11.0000
-076.2500 -11.0000
-076.2500  -4.0000
-070.0000  -4.0000
-070.0000   0.0000
-069.2500   0.0000
-`;
-
-var OriR = [];
-
-var a = Ori.split('\n');
-for (i in a) {
-    var x = a[i].split(/\s+/);
-    if (x.length == 2) {
-        OriR.push(x);
-    }
-}
-
-console.log(OriR);
-
 var Map = {
 
     // координаты событий
@@ -66,7 +23,8 @@ var Map = {
 
     _min_mag: 5,  // минимальная величина
 
-    svg: null, draw: null, w: 0, h: 0,
+    svg: null, draw: null, tags: null,
+    w: 0, h: 0,
 
     ra0: 0, ra1: 0, dec0: 0, dec1: 0, decRange: 0,
 
@@ -122,6 +80,12 @@ var Map = {
         }
         var x = this.ra2x(s.ra);
         var y = this.dec2y(s.dec);
+        if (s.name.search(' ') > 0) {
+            var letter = svgEl(this.tags, 'text',
+                // tag frame is not reverted axes
+                {x: this.w - x + r + 2, y: this.h - y - r - 2});
+            letter.innerHTML = s.name.split(' ', 1)[0];
+        }
         var circle = svgCircle(this.draw, x, y, r, {
             'class': 'star', 'fill': c});
         var t = svgEl(circle, 'title');
@@ -130,6 +94,7 @@ var Map = {
     },
 
     drawRegion: function(r) {
+        // TODO: check visibility
         for (c in ConstellationBoundaries) {
             var points = [];
             var bounds = ConstellationBoundaries[c]['bounds'];
@@ -138,10 +103,8 @@ var Map = {
                 var dec = parseFloat(bounds[i][1]);
                 points.push([this.ra2x(ra), this.dec2y(dec)].join(','));
             }
-            svgEl(this.draw, 'polygon', {
-                points: points.join(' '),
-                'class': 'hilitable'
-            });
+            svgEl(this.draw, 'polygon',
+                {points: points.join(' '), 'class': 'hilitable'});
         }
     },
 
@@ -163,6 +126,7 @@ var Map = {
 
     redrawMap: function() {
         removeAll(this.draw);
+        removeAll(this.tags);
         this.drawRegion();
         this.redrawGrid();
         var s;
@@ -172,6 +136,31 @@ var Map = {
                 this.drawStar(s);
             }
         }
+    },
+
+    shiftMap: function(dx, dy) {
+        // сдвиг по X:
+        // проворачиваем по кругу
+        var ra = this.ra0 + (dx / this.scaleX);
+        ra = seamless(ra, 0, 360);
+        this.ra0 = ra;
+        this.ra1 = seamless(ra + 90, 0, 360);
+        // сдвиг по Y:
+        // останавливаемся на -90 и на +90
+        var dec = this.dec0 + (dy / this.scaleY);
+        if (dy/this.scaleY > this.decRange || dy/this.scaleY < -this.decRange) {
+            dbg('This should not happen');
+        } else if (dec < -90.0) {
+            this.dec0 = -90;
+            this.dec1 = this.decRange - 90;
+        } else if (dec > 90.0 - this.decRange) {
+            this.dec0 = 90 - this.decRange;
+            this.dec1 = 90;
+        } else {
+            this.dec0 = dec;
+            this.dec1 = this.dec0 + this.decRange;
+        }
+        this.redrawMap();
     },
 
     init: function() {
@@ -213,6 +202,9 @@ var Map = {
         this.draw = svgEl(this.svg, 'g', {
             transform:`translate(${this.w},${this.h}) scale(-1,-1)`});
 
+
+        this.tags = svgEl(this.svg, 'g', {visibility:"visible"});
+
         this.redrawMap();
 
         // события
@@ -228,30 +220,33 @@ var Map = {
             _it._moving = false;
             var dx = parseInt(e.clientX) - _it._x;
             var dy = parseInt(e.clientY) - _it._y;
-            // сдвиг по X:
-            // проворачиваем по кругу
-            var ra = _it.ra0 + (dx / _it.scaleX);
-            ra = seamless(ra, 0, 360);
-            _it.ra0 = ra;
-            _it.ra1 = seamless(ra + 90, 0, 360);
-            // сдвиг по Y:
-            // останавливаемся на -90 и на +90
-            var dec = _it.dec0 + (dy / _it.scaleY);
-            if (dy/_it.scaleY > _it.decRange || dy/_it.scaleY < -_it.decRange) {
-                dbg('Too big leap!');
-            } else if (dec < -90.0) {
-                _it.dec0 = -90;
-                _it.dec1 = _it.decRange - 90;
-            } else if (dec > 90.0 - _it.decRange) {
-                _it.dec0 = 90 - _it.decRange;
-                _it.dec1 = 90;
-            } else {
-                _it.dec0 = dec;
-                _it.dec1 = _it.dec0 + _it.decRange;
+            _it.shiftMap(dx, dy);
+        };
+
+        page.onkeydown = function(event) {
+            var shiftStep = 50;
+            switch (event.key) {
+                case 'ArrowUp':
+                    _it.shiftMap(0, shiftStep);
+                    break;
+                case 'ArrowDown':
+                    _it.shiftMap(0, -shiftStep);
+                    break;
+                case 'ArrowLeft':
+                    _it.shiftMap(shiftStep, 0);
+                    break;
+                case 'ArrowRight':
+                    _it.shiftMap(-shiftStep, 0);
+                    break;
+                case ' ':
+                    if ('visible' == _it.tags.getAttribute('visibility'))
+                        _it.tags.setAttribute('visibility', 'hidden');
+                    else
+                        _it.tags.setAttribute('visibility', 'visible');
+                    break;
             }
-            _it.redrawMap();
-            dbg(_it);
-        }
+        };
+
     },
 
     toString: function() {
