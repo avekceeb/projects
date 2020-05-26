@@ -13,6 +13,48 @@
  *
  */
 
+var Ori = `069.2500   0.0000
+069.2500  15.5000
+074.5000  15.5000
+074.5000  16.0000
+080.0000  16.0000
+080.0000  15.5000
+084.0000  15.5000
+084.0000  12.5000
+086.5000  12.5000
+086.5000  18.0000
+085.5000  18.0000
+085.5000  22.8333
+088.2500  22.8333
+088.2500  21.5000
+093.2500  21.5000
+093.2500  17.5000
+094.6250  17.5000
+094.6250  12.0000
+094.6250  10.0000
+093.6250  10.0000
+093.6250   0.0000
+093.6250  -4.0000
+087.5000  -4.0000
+087.5000 -11.0000
+076.2500 -11.0000
+076.2500  -4.0000
+070.0000  -4.0000
+070.0000   0.0000
+069.2500   0.0000
+`;
+
+var OriR = [];
+
+var a = Ori.split('\n');
+for (i in a) {
+    var x = a[i].split(/\s+/);
+    if (x.length == 2) {
+        OriR.push(x);
+    }
+}
+
+console.log(OriR);
 
 var Map = {
 
@@ -87,6 +129,22 @@ var Map = {
             `${s.name} (${s.ra.toFixed(2)}&deg; ${s.dec.toFixed(2)}&deg;)`;
     },
 
+    drawRegion: function(r) {
+        for (c in ConstellationBoundaries) {
+            var points = [];
+            var bounds = ConstellationBoundaries[c]['bounds'];
+            for (i in bounds) {
+                var ra = parseFloat(bounds[i][0]);
+                var dec = parseFloat(bounds[i][1]);
+                points.push([this.ra2x(ra), this.dec2y(dec)].join(','));
+            }
+            svgEl(this.draw, 'polygon', {
+                points: points.join(' '),
+                'class': 'hilitable'
+            });
+        }
+    },
+
     redrawGrid: function() {
         // TODO: привязать сетку к целым значениям
         // вертикальная
@@ -105,14 +163,14 @@ var Map = {
 
     redrawMap: function() {
         removeAll(this.draw);
+        this.drawRegion();
         this.redrawGrid();
         var s;
         for (i in BSC) {
             s = BSC[i];
-            if ( ! this.checkVisible(s)) {
-                continue;
+            if (this.checkVisible(s)) {
+                this.drawStar(s);
             }
-            this.drawStar(s);
         }
     },
 
@@ -212,6 +270,10 @@ Dec:     ${this.dec0.toFixed(2)}..${this.dec1.toFixed(2)}
 
 
 function start() {
+    // var a = Boo.split('\n');
+    // for (i in a) {
+    //     console.log(a[i].split(/\s+/));
+    // }
     Map.init();
     dbg(Map);
 }

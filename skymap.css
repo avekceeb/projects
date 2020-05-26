@@ -36,3 +36,15 @@ svg circle.grid {
     stroke-opacity: 0.4;
     stroke: #909090;
 }
+
+
+
+svg polygon.hilitable {
+    fill: #ffffff;
+    stroke: none;
+    fill-opacity: 0.0;
+}
+
+svg polygon.hilitable:hover {
+    fill-opacity: 0.05;
+}
