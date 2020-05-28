@@ -1,4 +1,9 @@
 
+
+
+const DefaultLatitude = 59.58;
+const DefaultLongitude = 30.14;
+
 //////  debug //////////////
 var Debug = true;
 dbg = function() {
@@ -8,8 +13,6 @@ dbg = function() {
     var args = Array.prototype.slice.call(arguments);
     console.log(args.join(' | '));
 }
-
-
 
 /////// html //////////////
 function getSizes() {
@@ -30,41 +33,14 @@ function removeAll(e) {
 }
 
 
-////////// svg ////////////////
-
-function svgEl(parent, name, attrs) {
-    var e = document.createElementNS("http://www.w3.org/2000/svg", name);
-    if (attrs != undefined) {
-        for (var k in attrs) {
-            e.setAttribute(k, attrs[k]);
-        }
-    }
-    if (parent != null) {
-        parent.appendChild(e);
-    }
-    return e;
-}
-
-
-function svgStraightLine(parent, x0, y0, dx, dy, attrs) {
-    attrs = attrs || {};
-    attrs['d'] = `M ${x0},${y0} l${dx},${dy}`;
-    var c = svgEl(parent, 'path', attrs);
-    return c;
-}
-
-
-function svgCircle(parent, cx, cy, r, attrs) {
-    attrs = attrs || {};
-    attrs.cx = cx;
-    attrs.cy = cy;
-    attrs.r = r;
-    var c = svgEl(parent, 'circle', attrs);
-    return c;
-}
-
 
 //////// some math ///////////////////////
+
+function isClose(a, b, absoluteTolerance) {
+    absoluteTolerance = absoluteTolerance || 1e-3;
+    return Math.abs(a - b) <= absoluteTolerance;
+}
+
 
 function getEquidistant(x0, x1, n) {
     // returns array of n+1 numbers between x0..x1
@@ -106,19 +82,9 @@ function seamless(x, xmin, xmax) {
     }
 }
 
-
-// some trigonometry
-const RadInDeg = Math.PI/180;
-function sin(deg) { return Math.sin(RadInDeg*deg); }
-
-function cos(deg) { return Math.cos(RadInDeg*deg); }
-
-function tan(deg) { return Math.sin(RadInDeg*deg); }
-
-function arccos(x) { return Math.acos(x) / RadInDeg; }
-
-
-// some hours/minutes/seconds to degrees translation
-function hours2deg(h) { return h * 15.0; }
-
-function deg2hours(deg) { return deg / 15.0 };
+// module exporting
+if (typeof module !== 'undefined') {
+    module.exports = {
+        isClose: isClose,
+    };
+}

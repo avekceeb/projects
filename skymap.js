@@ -32,6 +32,8 @@ var Map = {
 
     scaleX: 1, scaleY: 1,
 
+    e2h: function (r,d) {return [r,d];},
+
     ra2x: function(ra) {
             // бесшовная карта
             if (this.ra0 > this.ra1) {
@@ -60,8 +62,12 @@ var Map = {
         // порог: видимая величина
         if (this._min_mag < s.mag) return false;
         // сетка X не пересекает 0:
-        return within(s.ra, this.ra0, this.ra1, 360) &&
-            within(s.dec, this.dec0, this.dec1);
+        var alt, az;
+        [az, alt] = this.e2h(s.ra, s.dec);
+        return within(az, this.ra0, this.ra1, 360) &&
+            within(alt, this.dec0, this.dec1);
+        // return within(s.ra, this.ra0, this.ra1, 360) &&
+        //     within(s.dec, this.dec0, this.dec1);
     },
 
     drawStar: function(s) {
@@ -82,8 +88,12 @@ var Map = {
             default:
                 dbg('Unknown spectral class: ', s.st);
         }
-        var x = this.ra2x(s.ra);
-        var y = this.dec2y(s.dec);
+        var az, alt;
+        [az, alt] = this.e2h(s.ra, s.dec);
+        // var x = this.ra2x(s.ra);
+        // var y = this.dec2y(s.dec);
+        var x = this.ra2x(az);
+        var y = this.dec2y(alt);
         if (s.name.search(' ') > 0) {
             var letter = svgEl(this.tags, 'text',
                 // tag frame is not reverted axes
@@ -131,8 +141,8 @@ var Map = {
     redrawMap: function() {
         removeAll(this.draw);
         removeAll(this.tags);
-        this.drawRegion();
-        this.redrawGrid();
+        //this.drawRegion();
+        //this.redrawGrid();
         var s;
         for (i in BSC) {
             s = BSC[i];
@@ -191,18 +201,30 @@ var Map = {
             x: 0, y: 0, width: '100%', height: '100%',
             fill: '#000000', stroke: 'none'});
 
-        // возьмем начальную карту как:
-        // c 2-х до 8-ми часов
-        this.ra0 = hours2deg(2.0);
-        this.ra1 = hours2deg(8.0);
-
-        // берем масштаб по Y = масштаб по X:
-        this.scaleX = this.scaleY = this.w / (this.ra1 - this.ra0);
-        // масштаб по Х: raRange == 90 degrees = 6 hours
-        // масштаб по Y:
-        this.decRange = (this.h / this.scaleY);
-        this.dec0 = -this.decRange/2;
-        this.dec1 = this.decRange/2;
+        if (false) {
+            // возьмем начальную карту как:
+            // c 2-х до 8-ми часов
+            this.ra0 = hours2deg(2.0);
+            this.ra1 = hours2deg(8.0);
+            // берем масштаб по Y = масштаб по X:
+            this.scaleX = this.scaleY = this.w / (this.ra1 - this.ra0);
+            // масштаб по Х: raRange == 90 degrees = 6 hours
+            // масштаб по Y:
+            this.decRange = (this.h / this.scaleY);
+            this.dec0 = -this.decRange/2;
+            this.dec1 = this.decRange/2;
+        } else {
+            var jd = julianDateNow();
+            var s0 = siderealTime(jd);
+            this.e2h = getE2HTransformMap(s0, DefaultLatitude, DefaultLongitude);
+            this.ra0 = -45.0;
+            this.ra1 = 45.0;
+            this.scaleX = this.scaleY = this.w / (this.ra1 - this.ra0);
+            this.decRange = (this.h / this.scaleY);
+            this.dec0 = 0;
+            this.dec1 = this.decRange;
+        }
+        // создаем группу для звезд
         this.draw = svgEl(this.svg, 'g', {
             transform:`translate(${this.w},${this.h}) scale(-1,-1)`});
 
