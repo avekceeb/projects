@@ -1,29 +1,29 @@
 
 /*
 TODO:
-* 
+*
 * калькулятор !!!
-* 
+*
 * on mouse leave draw - remove marker
-* 
+*
 * ticks format 1.0e-00
-* 
+*
 * create Svg dynamically
-* 
+*
 * add units to Xs
-* 
+*
 * several lines simulataneously
-* 
+*
 * константы:
 *     функции
 *     добавлять маркеры
-* 
+*
 * перевод из одних едениц в другие (массово?)
-* 
+*
 * функция для генерации строки transform
-* 
+*
 * replacement long dash in UTF-8 Encoding: 0xE2 0x80 0x94
-* 
+*
 */
 
 // page elements:
@@ -173,7 +173,7 @@ function translateAngular(hour, degree, hms, dms) {
 
 function createAngular() {
     var table = document.createElement('table');
-    
+
 }
 
 
@@ -340,7 +340,7 @@ function setZero(x0, x1, y0, y1, sx, sy) {
 
 
 function getFunction() {
-    console.log(Func.value);
+    // return new Function('x', 'y', 'return x + y');
     eval('f = function(x){ return (' + Func.value + ');}');
     return f; 
 }
@@ -481,7 +481,7 @@ function addPoint(x, y, xreal, yreal) {
     p.setAttribute('class', 'point');
     p.setAttribute('fill', Color);
     //p.setAttribute('onmouseover', 'showPoint(this,'+xreal+','+yreal+')');
-    Draw.appendChild(p);      
+    Draw.appendChild(p);
 }
 
 
@@ -507,9 +507,9 @@ function moveMarker(x, y) {
 
 
 function drawFunction() {
-    var x0, x1, y0, y1; 
+    var x0, x1, y0, y1;
     var x0 = getX0();
-    var x1 = getX1(); 
+    var x1 = getX1();
     var n = getN();
     var xs = getEquidistant(x0, x1, n);
     var ys = [];
@@ -548,12 +548,12 @@ function drawFunction() {
 
 
 function spiralOfArchimed(f) {
-    return (PolarRadius/360) * f;  
+    return (PolarRadius/360) * f;
 }
 
 
 function polarRose(f) {
-    return PolarRadius * Math.cos(4 * RadInDeg * f);  
+    return PolarRadius * Math.cos(4 * RadInDeg * f);
 }
 
 

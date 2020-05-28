@@ -10,6 +10,8 @@
  *    5) заменить имена звезд
  *    6) названия созвездий (ссылки на вики)
  *    7) меню: ...
+ *    8) zoom
+ *    9) рисовать экватор, точки равноденствия, полюса, эклиптику...
  *
  */
 
@@ -46,11 +48,13 @@ var Map = {
 
     x2ra: function(x) {  // not used so far
             var ra = x/this.scaleX + this.ra0;
-            if (ra >= 360) ra -= 360;
+            // if (ra >= 360) ra -= 360;
             return ra;
         },
 
-    y2dec: function(y) { return y/this.scaleY; },
+    y2dec: function(y) {
+        return (this.h - y)/this.scaleY + this.dec0;
+    },
 
     checkVisible: function(s) {
         // порог: видимая величина
@@ -136,6 +140,7 @@ var Map = {
                 this.drawStar(s);
             }
         }
+        dbg(this);
     },
 
     shiftMap: function(dx, dy) {
@@ -179,8 +184,7 @@ var Map = {
         this.svg = svgEl(page, 'svg', {
             width: this.w, height: this.h,
             version: '1.1',
-            viewBox: `0 0 ${this.w} ${this.h}`}
-            );
+            viewBox: `0 0 ${this.w} ${this.h}`});
 
         // background
         svgEl(this.svg, 'rect', {
@@ -247,6 +251,22 @@ var Map = {
             }
         };
 
+        page.onwheel = function(event) {
+            event.preventDefault();
+            var k = 1 - 0.05 * Math.sign(event.deltaY);
+            // TODO: take care of limits!
+            dbg(_it.x2ra(event.clientX), _it.y2dec(event.clientY));
+            // var centerRa = (_it.ra1 + _it.ra0) / 2;
+            // var centerDec = (_it.dec1 + _it.dec0) / 2;
+            // TODO: rescale function
+            _it.ra1 *= k;
+            _it.ra0 *= k;
+            _it.dec0 *= k;
+            _it.dec1 *= k;
+            _it.scaleX = _it.scaleY = _it.w / (_it.ra1 - _it.ra0);
+            _it.decRange = (_it.h / _it.scaleY);
+            _it.redrawMap();
+        };
     },
 
     toString: function() {

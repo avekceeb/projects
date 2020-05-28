@@ -90,7 +90,7 @@ function within(x, x0, x1, xmax) {
         return x > x0 && x < x1;
     } else {
         if (xmax == undefined) return false;
-        return (x > x0 && x < xmax) || (x > 0 && x < x1); 
+        return (x > x0 && x < xmax) || (x > 0 && x < x1);
     }
 }
 
@@ -108,17 +108,17 @@ function seamless(x, xmin, xmax) {
 
 
 // some trigonometry
-var RadInDeg = Math.PI/180;
+const RadInDeg = Math.PI/180;
 function sin(deg) { return Math.sin(RadInDeg*deg); }
 
 function cos(deg) { return Math.cos(RadInDeg*deg); }
 
 function tan(deg) { return Math.sin(RadInDeg*deg); }
 
+function arccos(x) { return Math.acos(x) / RadInDeg; }
 
 
 // some hours/minutes/seconds to degrees translation
 function hours2deg(h) { return h * 15.0; }
 
 function deg2hours(deg) { return deg / 15.0 };
-
