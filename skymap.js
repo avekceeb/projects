@@ -48,7 +48,7 @@ var Map = {
         return (dec - this.dec0)* this.scaleY;
     },
 
-    x2ra: function(x) {  // not used so far
+    x2ra: function(x) {
             var ra = x/this.scaleX + this.ra0;
             // if (ra >= 360) ra -= 360;
             return ra;
@@ -77,14 +77,25 @@ var Map = {
         if (r < 1.5) r = 1.5;
         // спектральный класс
         var c = '#d0d0d0';
-        switch (s.st[0]) {
+        var l = s.st[0];
+        if (s.st.indexOf('g:') == 0) {
+            l = s.st[2];
+        } else if (['g', 'c', 'd'].indexOf(l) >= 0) {
+            l = s.st[1];
+        } else if (s.st.indexOf('sg') == 0) {
+            l = s.st[2];
+        }
+        switch (l) {
+            case 'W':
             case 'O': c = '#99adff'; break; //голубой
             case 'B': c = '#c9d7ff'; break; //бело-голубой
             case 'A': c = '#f8f7ff'; break; //белый
             case 'F': c = '#fff4eb'; break; //желто-белый
             case 'G': c = '#fff2a1'; break; //желтый
             case 'K': c = '#ffc370'; break; //оранжевый
-            case 'M': c = '#ff6161'; break; //красный
+            case 'M':
+            case 'C':
+            case 'S': c = '#ff6161'; break; //красный
             default:
                 dbg('Unknown spectral class: ', s.st);
         }
@@ -109,12 +120,12 @@ var Map = {
 
     drawRegion: function(r) {
         // TODO: check visibility
-        for (c in ConstellationBoundaries) {
+        for (let c of ConstellationBoundaries) {
             var points = [];
-            var bounds = ConstellationBoundaries[c]['bounds'];
-            for (i in bounds) {
-                var ra = parseFloat(bounds[i][0]);
-                var dec = parseFloat(bounds[i][1]);
+            var bounds = c['bounds'];
+            for (let i of bounds) {
+                var ra = parseFloat(i[0]);
+                var dec = parseFloat(i[1]);
                 points.push([this.ra2x(ra), this.dec2y(dec)].join(','));
             }
             svgEl(this.draw, 'polygon',
@@ -141,16 +152,14 @@ var Map = {
     redrawMap: function() {
         removeAll(this.draw);
         removeAll(this.tags);
-        //this.drawRegion();
-        //this.redrawGrid();
-        var s;
-        for (i in BSC) {
-            s = BSC[i];
+        this.drawRegion();
+        this.redrawGrid();
+        for (let s of BSC) {
             if (this.checkVisible(s)) {
                 this.drawStar(s);
             }
         }
-        dbg(this);
+        // dbg(this);
     },
 
     shiftMap: function(dx, dy) {
@@ -180,7 +189,7 @@ var Map = {
 
     init: function() {
 
-        var _it = this;
+        var that = this;
         // очищаем
         var page = document.getElementsByTagName("body")[0];
         removeAll(page);
@@ -201,7 +210,7 @@ var Map = {
             x: 0, y: 0, width: '100%', height: '100%',
             fill: '#000000', stroke: 'none'});
 
-        if (false) {
+        if (true) {
             // возьмем начальную карту как:
             // c 2-х до 8-ми часов
             this.ra0 = hours2deg(2.0);
@@ -235,41 +244,41 @@ var Map = {
 
         // события
         this.svg.onmousedown = function(e) {
-            if (_it._moving) return;
-            _it._x = parseInt(e.clientX);
-            _it._y = parseInt(e.clientY);
-            _it._moving = true;
+            if (that._moving) return;
+            that._x = parseInt(e.clientX);
+            that._y = parseInt(e.clientY);
+            that._moving = true;
         };
 
         this.svg.onmouseup = function(e) {
-            if (!_it._moving) return;
-            _it._moving = false;
-            var dx = parseInt(e.clientX) - _it._x;
-            var dy = parseInt(e.clientY) - _it._y;
-            _it.shiftMap(dx, dy);
+            if (!that._moving) return;
+            that._moving = false;
+        };
+
+        this.svg.onmousemove = function(e) {
+            if (!that._moving) return;
+            var x = parseInt(e.clientX);
+            var y = parseInt(e.clientY);
+            var dx = x - that._x;
+            var dy = y - that._y;
+            that._x = x;
+            that._y = y;
+            that.shiftMap(dx, dy);
         };
 
         page.onkeydown = function(event) {
             var shiftStep = 50;
             switch (event.key) {
-                case 'ArrowUp':
-                    _it.shiftMap(0, shiftStep);
-                    break;
-                case 'ArrowDown':
-                    _it.shiftMap(0, -shiftStep);
-                    break;
-                case 'ArrowLeft':
-                    _it.shiftMap(shiftStep, 0);
-                    break;
-                case 'ArrowRight':
-                    _it.shiftMap(-shiftStep, 0);
-                    break;
-                case ' ':
-                    if ('visible' == _it.tags.getAttribute('visibility'))
-                        _it.tags.setAttribute('visibility', 'hidden');
-                    else
-                        _it.tags.setAttribute('visibility', 'visible');
-                    break;
+            case 'ArrowUp': that.shiftMap(0, shiftStep); break;
+            case 'ArrowDown': that.shiftMap(0, -shiftStep); break;
+            case 'ArrowLeft': that.shiftMap(shiftStep, 0); break;
+            case 'ArrowRight': that.shiftMap(-shiftStep, 0); break;
+            case ' ':
+                if ('visible' == that.tags.getAttribute('visibility'))
+                    that.tags.setAttribute('visibility', 'hidden');
+                else
+                    that.tags.setAttribute('visibility', 'visible');
+                break;
             }
         };
 
@@ -277,17 +286,17 @@ var Map = {
             event.preventDefault();
             var k = 1 - 0.05 * Math.sign(event.deltaY);
             // TODO: take care of limits!
-            dbg(_it.x2ra(event.clientX), _it.y2dec(event.clientY));
-            // var centerRa = (_it.ra1 + _it.ra0) / 2;
-            // var centerDec = (_it.dec1 + _it.dec0) / 2;
+            dbg(that.x2ra(event.clientX), that.y2dec(event.clientY));
+            // var centerRa = (that.ra1 + that.ra0) / 2;
+            // var centerDec = (that.dec1 + that.dec0) / 2;
             // TODO: rescale function
-            _it.ra1 *= k;
-            _it.ra0 *= k;
-            _it.dec0 *= k;
-            _it.dec1 *= k;
-            _it.scaleX = _it.scaleY = _it.w / (_it.ra1 - _it.ra0);
-            _it.decRange = (_it.h / _it.scaleY);
-            _it.redrawMap();
+            that.ra1 *= k;
+            that.ra0 *= k;
+            that.dec0 *= k;
+            that.dec1 *= k;
+            that.scaleX = that.scaleY = that.w / (that.ra1 - that.ra0);
+            that.decRange = (that.h / that.scaleY);
+            that.redrawMap();
         };
     },
 
@@ -307,10 +316,5 @@ Dec:     ${this.dec0.toFixed(2)}..${this.dec1.toFixed(2)}
 
 
 function start() {
-    // var a = Boo.split('\n');
-    // for (i in a) {
-    //     console.log(a[i].split(/\s+/));
-    // }
     Map.init();
-    dbg(Map);
 }

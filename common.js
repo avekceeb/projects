@@ -32,7 +32,22 @@ function removeAll(e) {
     return e;
 }
 
-
+// endless generator for arbitrary colors
+// this is how to use it
+// var k = 0;
+// for (let c of colors()) {
+//     console.log(c);
+//     if (k++ > 10)
+//         break;
+// }
+function* colors() {
+    var c = ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
+        '#20B2AA', '#A52A2A', '#1E90FF', '#8B008B'];
+    var i = Math.floor(Math.random()*c.length);
+    while (true) {
+        yield c[(i++) % c.length];
+    }
+}
 
 //////// some math ///////////////////////
 
@@ -40,6 +55,7 @@ function isClose(a, b, absoluteTolerance) {
     absoluteTolerance = absoluteTolerance || 1e-3;
     return Math.abs(a - b) <= absoluteTolerance;
 }
+
 
 
 function getEquidistant(x0, x1, n) {

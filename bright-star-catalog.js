@@ -63666,3 +63666,10 @@ var BSC = [
     }
 ];
 
+
+// module exporting
+if (typeof module !== 'undefined') {
+    module.exports = {
+        BSC: BSC,
+    };
+}
