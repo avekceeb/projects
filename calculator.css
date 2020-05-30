@@ -1,3 +1,15 @@
+@font-face {
+  font-family: Raleway;
+  src: url(fonts/Raleway-Regular.ttf);
+}
+
+@font-face {
+  font-family: TeX;
+  src: url(fonts/texgyreschola-regular.otf) format("opentype");
+  /*font-style: italic;*/
+}
+
+
 html, body, h1, h2, h3, h4, h5, a, ul, li {
     margin: 0;
     padding: 0;
@@ -24,8 +36,10 @@ a:hover {
     color: tomato;
 }
 
+
+
 #content {
-    width: 100%;
+    width: 50%;
     min-width: 800px;
     margin: auto;
 }
@@ -82,8 +96,6 @@ a:hover {
 }
 
 
-
-
 svg {
   font: 10px monospace;
   margin: 20px auto;
@@ -120,4 +132,3 @@ svg circle.grid {
     stroke-opacity: 0.4;
     stroke: #909090;
 }
-

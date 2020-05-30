@@ -14,6 +14,19 @@ dbg = function() {
     console.log(args.join(' | '));
 }
 
+
+if (typeof(String.prototype.trim) === "undefined") {
+    String.prototype.trim = function() {
+        return String(this).replace(/^\s+|\s+$/g, '');
+    };
+}
+
+
+function padWithZeros(num, size) {
+    var s = "000000000" + num;
+    return s.substr(s.length-size);
+}
+
 /////// html //////////////
 function getSizes() {
     var win = window,
@@ -47,6 +60,61 @@ function* colors() {
     while (true) {
         yield c[(i++) % c.length];
     }
+}
+
+var russianMonth = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+var russianMonthGen = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня',
+    'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+
+var russianWeek = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда',
+    'Четверг', 'Пятница', 'Суббота'];
+
+function formatTime(h, m, s) {
+    if (s) {
+        return `${padWithZeros(h,2)}:${padWithZeros(m,2)}:${padWithZeros(s,2)}`;
+    } else {
+        return `${padWithZeros(h,2)}:${padWithZeros(m,2)}`;
+    }
+}
+
+
+function formatRussianDate(d) {
+    d = d || new Date();
+    return `${formatTime(d.getHours(), d.getMinutes())}&nbsp;&nbsp;&nbsp;` +
+        `${d.getDate()} ${russianMonthGen[d.getMonth()]}&nbsp;&nbsp;&nbsp;` +
+        `${d.getFullYear()}&nbsp;&nbsp;&nbsp;${russianWeek[d.getDay()]}`;
+}
+
+function getEnglishMonthsCalendar(year, month) {
+    // ихняя неделя начинается с воскресенья
+    var firstDay = (new Date(year, month, 1)).getDay();
+    var daysInMonth = 32 - new Date(year, month, 32).getDate();
+    var extra = (firstDay + daysInMonth)%7;
+    if (extra != 0) {
+        extra = 7 - extra;
+    }
+    var m = new Array(firstDay + daysInMonth + extra);
+    m.fill(0);
+    for (let d=1; d<=daysInMonth; d++) {
+        m[d+firstDay-1] = d;
+    }
+    return m;
+}
+
+function getMonthsCalendar(year, month) {
+    // нормальная человеческая неделя
+    // которая начинается с понедельника
+    var m = getEnglishMonthsCalendar(year, month);
+    if (m[0] == 0) {
+        m.shift();
+        m.push(0);
+    } else {
+        m = [0,0,0,0,0,0].concat(m);
+        m.push(0);
+    }
+    return m;
 }
 
 //////// some math ///////////////////////
@@ -102,5 +170,7 @@ function seamless(x, xmin, xmax) {
 if (typeof module !== 'undefined') {
     module.exports = {
         isClose: isClose,
+        getMonthsCalendar: getMonthsCalendar,
+        getEnglishMonthsCalendar: getEnglishMonthsCalendar,
     };
 }

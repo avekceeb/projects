@@ -4,6 +4,8 @@
         <title>Калькулятор</title>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></meta>
         <link href='calculator.css' rel='stylesheet' type='text/css'></link>
+        <script src='common.js' charset='utf-8'></script>
+        <script src='trigonometry.js' charset='utf-8'></script>
         <script src='calculator.js' charset='utf-8'></script>
     </head>
 
@@ -16,13 +18,13 @@
 
         <ul id='legend'>
         <li>
-            .... 
+            ....
         </li>
         </ul>
-        
+
         <div id="angulars"></div>
         <table>
-        
+
         <tr>
             <td>(h &prime; &Prime;)</td>
             <td><input type='text' id='hms' value='0' style='width:120px'
@@ -43,10 +45,10 @@
             <td><input type='text' id='degrees' value='0' style='width:120px'
                 oninput='translateAngular(null, this.value, null, null);'/></td>
         </tr>
-        
+
         </table>
-        
-        
+
+
     </div>
 
 
@@ -67,18 +69,18 @@
         <g id="draw" transform="translate(30,430) scale(1,-1)"></g>
 
         </svg>
-    
+
     </div>
-    
-    
+
+
     <div id="right">
         <ul id="options">
         <li>
             <span class='label'>f(x) = </span>
             <textarea id="function" rows="5" cols="30" style='width:200px; height:50px; display:block;'>
-                
+
                 x
-                
+
             </textarea>
             <!--input type="text" id='function' name="function"
                     list="functionslist">
@@ -98,19 +100,19 @@
         </li>
         <li>
             <input type="text" id='count'>
-            <span class='label'>точек</span> 
+            <span class='label'>точек</span>
         </li>
         <li>
             <input type="range" oninput='setScale(this.value)'
                 min="-100" max="100" value="0" step="1"
                 class="slider" id="scale-correction">
-            <span class='label'>масштаб</span> 
+            <span class='label'>масштаб</span>
         </li>
         <li>
             <input type="range"
                 min="-100" max="100" value="0"
                 class="slider" id="zero-correction">
-            <span class='label'>ноль</span> 
+            <span class='label'>ноль</span>
         </li>
         <li>
             <a href="#" onclick="drawFunction();"><span>построить в прямоугольных</span></a>

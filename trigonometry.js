@@ -26,6 +26,20 @@ function deg2hours(deg) {
     return deg / 15.0
 }
 
+function deg2hms(deg) {
+    var degrees, minutes, seconds;
+    var is_positive = (deg >= 0);
+    degrees = Math.abs(deg)*3600;
+    minutes = Math.floor(degrees/60);
+    seconds = degrees % 60;
+    degrees = Math.floor(minutes/60);
+    minutes = minutes % 60;
+    if (!is_positive) { // !!! if deg = -0.1
+        degrees = -degrees;
+    }
+    return [degrees, minutes, seconds];
+}
+
 
 // module exporting
 if (typeof module !== 'undefined') {

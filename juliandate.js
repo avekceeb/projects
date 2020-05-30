@@ -27,9 +27,9 @@ function julianDate(y, m, d) {
 }
 
 
-function julianDateNow() {
+function julianDateNow(now) {
     // Note: with seconds precision only !!!
-    var now = new Date();
+    now = now || new Date();
     var y = now.getUTCFullYear();
     var m = 1 + now.getUTCMonth();
     var d = now.getUTCDate();

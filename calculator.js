@@ -48,23 +48,6 @@ var Color = Colors[0];
 
 
 
-if (typeof(String.prototype.trim) === "undefined") {
-    String.prototype.trim = function() {
-        return String(this).replace(/^\s+|\s+$/g, '');
-    };
-}
-
-
-// some trigonometry
-var RadInDeg = Math.PI/180;
-function sin(deg) { return Math.sin(RadInDeg*deg); }
-
-function cos(deg) { return Math.cos(RadInDeg*deg); }
-
-function tan(deg) { return Math.sin(RadInDeg*deg); }
-
-
-
 // some hours/minutes/seconds to degrees translation
 function hms2float(h, m, s) {
     if (h < 0)
@@ -342,7 +325,7 @@ function setZero(x0, x1, y0, y1, sx, sy) {
 function getFunction() {
     // return new Function('x', 'y', 'return x + y');
     eval('f = function(x){ return (' + Func.value + ');}');
-    return f; 
+    return f;
 }
 
 

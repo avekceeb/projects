@@ -30,6 +30,18 @@ function svgCircle(parent, cx, cy, r, attrs) {
     return c;
 }
 
+function svgPathFromFunction(parent, f, xs, attrs) {
+    attrs = attrs || {};
+    let points = [];
+    for (let x of xs) {
+        points.push(`${x},${f(x)}`);
+    }
+    attrs['d'] = 'M ' + points.join(' L');
+    var p = svgEl(parent, 'path', attrs);
+    return p;
+}
+
+
 // module exporting
 /*
 if (typeof module !== 'undefined') {
