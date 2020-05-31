@@ -56,6 +56,17 @@ function siderealTime(jd) {
 }
 
 
+function sunTime(dt, longitude) {
+    /*
+    местное солнечное время
+    TODO: коррекция на уравнение времени
+    */
+    dt = dt || new Date();
+    longitude = longitude || DefaultLongitude;
+    return 0; // TODO
+}
+
+
 // module exporting
 if (typeof module !== 'undefined') {
     module.exports = {
