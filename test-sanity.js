@@ -25,26 +25,6 @@ assert(
     ));
 
 
-console.log('May');
-var c = common.getMonthsCalendar(2020, 4);
-while (c.length>0) {
-    console.log(c.splice(0, 7).join(' '));
-}
-
-console.log('March');
-c = common.getMonthsCalendar(2020, 2);
-while (c.length>0) {
-    console.log(c.splice(0, 7).join(' '));
-}
-
-console.log('September');
-c = common.getMonthsCalendar(2020, 8);
-while (c.length>0) {
-    console.log(c.splice(0, 7).join(' '));
-}
-
-console.log('February');
-c = common.getMonthsCalendar(2020, 1);
-while (c.length>0) {
-    console.log(c.splice(0, 7).join(' '));
-}
+var c = common.colors();
+for (let i=0; i<10; i++)
+    console.log(c.next().value);

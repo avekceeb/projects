@@ -51,6 +51,8 @@
 
     <div id="right">
         <ul id="options">
+            <!-- y = f(x)-->
+            <li>y = f(x)</li>
             <li>
                 <span class='label'>f(x) = </span>
                 <textarea id="function" rows="5" cols="30" style='width:200px; height:50px; display:block;'>
@@ -75,11 +77,47 @@
                 <span class='label'>]</span>
             </li>
             <li>
-                <input type="text" id='count'>
+                <input type="text" id='count' style='width:40px'></input>
                 <span class='label'>точек</span>
             </li>
             <li>
-                <a href="#" onclick="drawFunction();"><span>построить в прямоугольных</span></a>
+                <a href="#" onclick="drawFunction();">
+                    <span>построить y = f(x)</span>
+                </a>
+            </li>
+            <li>
+                <span class='label'>&nbsp;</span>
+            </li>
+            <!-- y = f(x)-->
+            <li>x = f(t); y = g(t);</li>
+            <li>
+                <span class='label'>x(t) = </span>
+                <textarea id="function-x-t" rows="5" cols="30"
+                    style='width:200px; height:50px; display:block;'>2*t
+                </textarea>
+                <span class='label'>y(t) = </span>
+                <textarea id="function-y-t" rows="5" cols="30"
+                    style='width:200px; height:50px; display:block;'>3*t
+                </textarea>
+            </li>
+            <li>
+                <span class='label'>t = [</span>
+                <input type='text' id='t0' value='0' style='width:40px'></input>
+                <span class='label'>,</span>
+                <input type='text' id='t1' value='10' style='width:40px'></input>
+                <span class='label'>]</span>
+            </li>
+            <li>
+                <input type="text" id='count-t' style='width:40px' value='10'></input>
+                <span class='label'>точек</span>
+            </li>
+            <li>
+                <a href="#" onclick="drawParametricFunction();">
+                    <span>построить x(t) y(t)</span>
+                </a>
+            </li>
+            <li>
+                <span class='label'>&nbsp;</span>
             </li>
             <li>
                 <a href="#" onclick="polarFunction(polarRose);"><span>В полярных: полярная роза</span></a>

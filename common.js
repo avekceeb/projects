@@ -169,6 +169,7 @@ function seamless(x, xmin, xmax) {
 // module exporting
 if (typeof module !== 'undefined') {
     module.exports = {
+        colors: colors,
         isClose: isClose,
         getMonthsCalendar: getMonthsCalendar,
         getEnglishMonthsCalendar: getEnglishMonthsCalendar,

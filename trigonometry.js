@@ -17,6 +17,14 @@ function arccos(x) {
     return Math.acos(x) / RadInDeg;
 }
 
+function arctg(x) {
+    return Math.atan(x) / RadInDeg;
+}
+
+function sqrt(x) {
+    return Math.sqrt(x);
+}
+
 function hours2deg(h) {
     return h * 15.0;
 }
@@ -62,6 +70,10 @@ function sphericalToCartesian(theta, fi, r) {
         r * Math.cos(t) ];
 }
 
+
+// arctg(tg(t)/sin(1))
+//
+// 90-arccos(cos(1)/sqrt(1 + tg(t)*tg(t)))
 
 // module exporting
 if (typeof module !== 'undefined') {

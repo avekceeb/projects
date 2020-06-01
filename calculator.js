@@ -42,10 +42,9 @@ var Width = 500;
 var Height = 400;
 var PolarRadius = 180;
 var TickSize = 30;
-var Colors = ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
-        '#20B2AA', '#A52A2A', '#1E90FF', '#8B008B'];
-var Color = Colors[0];
 
+var color = colors();
+var Color = color.next().value;
 
 
 function parseAngularString(v) {
@@ -126,21 +125,6 @@ function translateAngular(hour, degree, hms, dms) {
         elHms.value = formatHMS(h, hm, hs);
 }
 
-
-/*
-function translateHMS(v) {
-    horizontalFunction();
-    var x, y, z;
-    var x,y,z,d;
-    var p = [];
-    for (var t=0; t<=180; t+=1) {
-            [x,y,z] = sphericalProjectionSchmidt(t, -(deg-90), PolarRadius);
-            p.push([y,z].join(','));
-    }
-    d = 'M' + p.join(' L');
-    svgLine(Draw, d, {stroke: '#A52A2A'});
-}
-*/
 
 function start() {
     translateAngular('0h', null, null, null);
@@ -256,7 +240,7 @@ function drawTicks(x0, x1, y0, y1, sx, sy) {
         x = xticks[i]*sx;
         d.push(`M${x},${ty} l0,${Height+TickSize}`);
         svgEl(Grid, 'text', {x: x, y: ty+Height+TickSize})
-            .innerHTML = xticks[i];
+            .innerHTML = xticks[i].toFixed(2); // TODO: format (f.e. 0.00001)
     }
     svgEl(Grid, 'path', {d: d.join(' '), 'class': 'grid'});
     // Y
@@ -267,7 +251,7 @@ function drawTicks(x0, x1, y0, y1, sx, sy) {
         y = ty + (y1 - yticks[i])*sy;
         d.push(`M${x},${y} l${Width+TickSize},0`);
         svgEl(Grid, 'text', {x: x, y: y})
-            .innerHTML = yticks[i];
+            .innerHTML = yticks[i].toFixed(2); ;// TODO: format
     }
     svgEl(Grid, 'path', {d: d.join(' '), 'class': 'grid'});
 }
@@ -318,48 +302,27 @@ function gridToHorizontal() {
 function gridToPolar() {
     setFrame();
     for (var r=PolarRadius; r>0; r-=PolarRadius/9) {
-        var c = svgCircle(Grid, 0, 0, r, {class: 'grid'});
+        svgCircle(Grid, 0, 0, r, {class: 'grid'});
     }
     for (var a=0; a<180; a+=15) {
         svgStraightLine(Grid, -PolarRadius, 0, 2*PolarRadius, 0, {
             class: 'grid',
             transform: 'rotate('+a+')'});
     }
-}
-
-
-function gridToEqualAreaProjection() {
-    Grid.setAttribute('transform', 'translate('+(TickSize+Width/2)+','+(TickSize+Height/2)+') scale(1,-1)');
-    Draw.setAttribute('transform', 'translate('+(TickSize+Width/2)+','+(TickSize+Height/2)+') scale(1,-1)');
-    for (var a=0; a<=90; a+=15) {
-        //var c = svgCircle(Grid, 0, 0, PolarRadius*Math.tan(RadInDeg*(a)/2), {class: 'grid'});
-        var c = svgCircle(Grid, 0, 0, PolarRadius*Math.sqrt(2)*Math.sin(RadInDeg*(a)/2), {class: 'grid'});
-    }
-    /*
-    for (var a=0; a<180; a+=15) {
-        svgStraightLine(Grid, -PolarRadius, 0, 2*PolarRadius, 0, {
-            class: 'grid',
-            transform: 'rotate('+a+')'});
-    }*/
 }
 
 
 function addPoint(x, y, xreal, yreal) {
-    var p = svgEl(Draw, 'circle');
-    var t = svgEl(p, 'title');
-    t.innerHTML = 'x: ' + xreal + ' y: ' + yreal;
-    p.setAttribute('cx', x);
-    p.setAttribute('cy', y);
-    p.setAttribute('r', '1%');
-    p.setAttribute('class', 'point');
-    p.setAttribute('fill', Color);
+    var p = svgEl(Draw, 'circle', {
+        'cx': x, 'cy': y, 'r': '1%', 'class': 'point', 'fill': Color});
+    // TODO: format 0.00001 ....
+    svgEl(p, 'title').innerHTML = `x: ${xreal.toFixed(2)} y: ${yreal.toFixed(2)}`;
     //p.setAttribute('onmouseover', 'showPoint(this,'+xreal+','+yreal+')');
 }
 
 
 function drawSeries(xs, ys, sx, sy) {
     // TODO: options: o * V --
-    var path = svgEl(Draw, 'path');
     var p = [];
     var x, y;
     for (var i=0; i<xs.length; i++) {
@@ -368,8 +331,7 @@ function drawSeries(xs, ys, sx, sy) {
         p.push("" + x + "," + y);
         addPoint(x, y, xs[i], ys[i]);
     }
-    path.setAttribute('d', "M" + p.join(" L"));
-    path.setAttribute('stroke', Color);
+    svgEl(Draw, 'path', {'d': "M" + p.join(" L"), 'stroke': Color});
 }
 
 
@@ -379,25 +341,17 @@ function drawFunction() {
     var x1 = getX1();
     var n = getN();
     var xs = getEquidistant(x0, x1, n);
-    var ys = [];
     var f = getFunction();
     if (typeof(f) !== 'function') {
         // TODO
         alert("Error: invalid function!");
         return;
     }
-    x0 = x1 = xs[0];
-    y0 = y1 = f(x0);
-    ys.push(y0);
-    var y;
-    for (var i=1; i<xs.length; i++) {
-        x0 = Math.min(x0, xs[i]);
-        x1 = Math.max(x1, xs[i]);
-        y = f(xs[i]);
-        y0 = Math.min(y0, y);
-        y1 = Math.max(y1, y);
-        ys.push(y);
-    }
+    var ys = xs.map(f);
+    x0 = Math.min.apply(null, xs);
+    x1 = Math.max.apply(null, xs);
+    y0 = Math.min.apply(null, ys);
+    y1 = Math.max.apply(null, ys);
     var sx = Width / (x1 - x0);
     var sy = Height / (y1 - y0);
     // TODO: смотреть на флаг
@@ -406,12 +360,46 @@ function drawFunction() {
     removeAll(Legend);
     gridToCartesian();
     //
-    Color = Colors[Math.floor(Math.random()*Colors.length)];
+    Color = color.next().value;
     setZero(x0, x1, y0, y1, sx, sy);
     drawTicks(x0, x1, y0, y1, sx, sy);
     drawSeries(xs, ys, sx, sy);
     addLegend();
 }
+
+
+function drawParametricFunction() {
+    var xt = new Function('t', 'return (' + document.getElementById("function-x-t").value + ')');
+    var yt = new Function('t', 'return (' + document.getElementById("function-y-t").value + ')');
+    if (typeof(xt) !== 'function' || typeof(yt) !== 'function') {
+        alert("Error: invalid function!");
+        return;
+    }
+    var t0 = parseFloat(document.getElementById("t0").value);
+    var t1 = parseFloat(document.getElementById("t1").value);
+    var n = parseInt(document.getElementById("count-t").value);
+    var ts = getEquidistant(t0, t1, n);
+    var xs = ts.map(xt);
+    var ys = ts.map(yt);
+    x0 = Math.min.apply(null, xs);
+    x1 = Math.max.apply(null, xs);
+    y0 = Math.min.apply(null, ys);
+    y1 = Math.max.apply(null, ys);
+    var sx = Width / (x1 - x0);
+    var sy = Height / (y1 - y0);
+    // TODO: смотреть на флаг
+    removeAll(Draw);
+    removeAll(Grid);
+    removeAll(Legend);
+    gridToCartesian();
+    Color = color.next().value;
+    setZero(x0, x1, y0, y1, sx, sy);
+    drawTicks(x0, x1, y0, y1, sx, sy);
+    drawSeries(xs, ys, sx, sy);
+    addLegend();
+}
+
+////////////////////////////
 
 
 function spiralOfArchimed(f) {
@@ -424,27 +412,27 @@ function polarRose(f) {
 }
 
 
-function sphericalProjectionSchmidt(theta, fi, r) {
-    var t = RadInDeg * theta;
-    var f = RadInDeg * fi;
-    var sin_t = Math.sin(t);
-    return [
-        r * sin_t * Math.cos(f),
-        r * sin_t * Math.sin(f),
-        r * Math.cos(t) ];
-}
-
-
-function sphericalProjectionWulf(theta, fi, r) {
-    var t = RadInDeg * theta;
-    var f = RadInDeg * fi;
-    var sin_t = Math.sin(t);
-    return [
-        r * sin_t * Math.cos(f),
-        r * sin_t * Math.sin(f),
-        r * Math.cos(t) ];
-}
-
+// function sphericalProjectionSchmidt(theta, fi, r) {
+//     var t = RadInDeg * theta;
+//     var f = RadInDeg * fi;
+//     var sin_t = Math.sin(t);
+//     return [
+//         r * sin_t * Math.cos(f),
+//         r * sin_t * Math.sin(f),
+//         r * Math.cos(t) ];
+// }
+//
+//
+// function sphericalProjectionWulf(theta, fi, r) {
+//     var t = RadInDeg * theta;
+//     var f = RadInDeg * fi;
+//     var sin_t = Math.sin(t);
+//     return [
+//         r * sin_t * Math.cos(f),
+//         r * sin_t * Math.sin(f),
+//         r * Math.cos(t) ];
+// }
+//
 
 function polarFunction(f) {
     removeAll(Draw);
@@ -480,6 +468,20 @@ function horizontalFunction() {
         svgLine(Draw, d, {stroke: '#B09090'});
     }
     */
+}
+
+
+
+function gridToEqualAreaProjection() {
+    setFrame();
+    for (var a=0; a<=90; a+=15) {
+        svgCircle(Grid, 0, 0, PolarRadius*Math.sqrt(2)*Math.sin(RadInDeg*(a)/2), {class: 'grid'});
+    }
+    for (var a=0; a<180; a+=15) {
+        svgStraightLine(Grid, -PolarRadius, 0, 2*PolarRadius, 0, {
+            class: 'grid',
+            transform: 'rotate('+a+')'});
+    }
 }
 
 function projectionEqualArea() {
