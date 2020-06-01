@@ -13,6 +13,14 @@ function svgEl(parent, name, attrs) {
 }
 
 
+function svgLine(parent, d, attrs) {
+    attrs = attrs || {};
+    attrs['d'] = d;
+    var c = svgEl(parent, 'path', attrs);
+    return c;
+}
+
+
 function svgStraightLine(parent, x0, y0, dx, dy, attrs) {
     attrs = attrs || {};
     attrs['d'] = `M ${x0},${y0} l${dx},${dy}`;
@@ -29,6 +37,14 @@ function svgCircle(parent, cx, cy, r, attrs) {
     var c = svgEl(parent, 'circle', attrs);
     return c;
 }
+
+
+function svgSetTransform(el, translateX, translateY, scaleX, scaleY) {
+    // TODO: rotate params
+    el.setAttribute('transform',
+        `translate(${translateX},${translateY}) scale(${scaleX},${scaleY})`);
+}
+
 
 function svgPathFromFunction(parent, f, xs, attrs) {
     attrs = attrs || {};

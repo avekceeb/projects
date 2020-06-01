@@ -6,6 +6,7 @@
         <link href='calculator.css' rel='stylesheet' type='text/css'></link>
         <script src='common.js' charset='utf-8'></script>
         <script src='trigonometry.js' charset='utf-8'></script>
+        <script src='svg.js' charset='utf-8'></script>
         <script src='calculator.js' charset='utf-8'></script>
     </head>
 
@@ -22,46 +23,21 @@
         </li>
         </ul>
 
-        <div id="angulars"></div>
-        <table>
-
-        <tr>
-            <td>(h &prime; &Prime;)</td>
-            <td><input type='text' id='hms' value='0' style='width:120px'
-                oninput='translateAngular(null, null, this.value, null);'/></td>
-        </tr>
-        <tr>
-            <td>(h)</td>
-            <td><input type='text' id='hours' value='0' style='width:120px'
-                oninput='translateAngular(this.value, null, null, null);'/></td>
-        </tr>
-        <tr>
-            <td>(&deg; &prime; &Prime;)</td>
-            <td><input type='text' id='dms' value='0' style='width:120px'
-                oninput='translateAngular(null, null, null, this.value);'/></td>
-        </tr>
-        <tr>
-            <td>(&deg;)</td>
-            <td><input type='text' id='degrees' value='0' style='width:120px'
-                oninput='translateAngular(null, this.value, null, null);'/></td>
-        </tr>
-
-        </table>
-
 
     </div>
 
 
     <div id='center'>
+        <!-- TODO: reset sizes in js -->
         <svg
-            width="460"
+            width="560"
             height="460"
             version="1.1"
-            viewBox="0 0 460 460"
+            viewBox="0 0 560 460"
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink">
 
-        <rect id="draw-area" x="30" y="30" width="400" height="400"
+        <rect id="draw-area" x="30" y="30" width="500" height="400"
               fill="#FFFFFF" stroke="#C0C0C0" stroke-width="1px"/>
 
         <g id="grid" transform="translate(30,30)"></g>
@@ -75,61 +51,85 @@
 
     <div id="right">
         <ul id="options">
-        <li>
-            <span class='label'>f(x) = </span>
-            <textarea id="function" rows="5" cols="30" style='width:200px; height:50px; display:block;'>
+            <li>
+                <span class='label'>f(x) = </span>
+                <textarea id="function" rows="5" cols="30" style='width:200px; height:50px; display:block;'>
 
-                x
+                    x
 
-            </textarea>
-            <!--input type="text" id='function' name="function"
-                    list="functionslist">
-            <datalist id="functionslist">
-                <option value="x"></option>
-                <option value="Math.sin(x)"></option>
-                <option value="Math.exp(x)"></option>
-                <option value="/*Sinus in degrees*/ Math.sin(Math.PI/180*x)"></option>
-            </datalist-->
-        </li>
-        <li>
-            <span class='label'>x = [</span>
-            <input type='text' id='x0' value='0' style='width:40px'></input>
-            <span class='label'>,</span>
-            <input type='text' id='x1' value='10' style='width:40px'></input>
-            <span class='label'>]</span>
-        </li>
-        <li>
-            <input type="text" id='count'>
-            <span class='label'>точек</span>
-        </li>
-        <li>
-            <input type="range" oninput='setScale(this.value)'
-                min="-100" max="100" value="0" step="1"
-                class="slider" id="scale-correction">
-            <span class='label'>масштаб</span>
-        </li>
-        <li>
-            <input type="range"
-                min="-100" max="100" value="0"
-                class="slider" id="zero-correction">
-            <span class='label'>ноль</span>
-        </li>
-        <li>
-            <a href="#" onclick="drawFunction();"><span>построить в прямоугольных</span></a>
-        </li>
-        <li>
-            <a href="#" onclick="polarFunction(polarRose);"><span>В полярных: полярная роза</span></a>
-        </li>
-        <li>
-            <a href="#" onclick="polarFunction(spiralOfArchimed);"><span>В полярных: спираль Архимеда</span></a>
-        </li>
-        <li>
-            <a href="#" onclick="projectionEqualArea();"><span>Полярная проекция полусферы</span></a>
-        </li>
-        <li>
-            <a href="#" onclick="horizontalFunction();"><span>Горизонтальные</span></a>
-        </li>
+                </textarea>
+                <!--input type="text" id='function' name="function"
+                        list="functionslist">
+                <datalist id="functionslist">
+                    <option value="x"></option>
+                    <option value="Math.sin(x)"></option>
+                    <option value="Math.exp(x)"></option>
+                    <option value="/*Sinus in degrees*/ Math.sin(Math.PI/180*x)"></option>
+                </datalist-->
+            </li>
+            <li>
+                <span class='label'>x = [</span>
+                <input type='text' id='x0' value='0' style='width:40px'></input>
+                <span class='label'>,</span>
+                <input type='text' id='x1' value='10' style='width:40px'></input>
+                <span class='label'>]</span>
+            </li>
+            <li>
+                <input type="text" id='count'>
+                <span class='label'>точек</span>
+            </li>
+            <li>
+                <a href="#" onclick="drawFunction();"><span>построить в прямоугольных</span></a>
+            </li>
+            <li>
+                <a href="#" onclick="polarFunction(polarRose);"><span>В полярных: полярная роза</span></a>
+            </li>
+            <li>
+                <a href="#" onclick="polarFunction(spiralOfArchimed);"><span>В полярных: спираль Архимеда</span></a>
+            </li>
+            <li>
+                <a href="#" onclick="projectionEqualArea();"><span>Полярная проекция полусферы</span></a>
+            </li>
+            <li>
+                <a href="#" onclick="horizontalFunction();"><span>Горизонтальные</span></a>
+            </li>
+            <li>
+                <input type="range" oninput='setScale(this.value)'
+                    min="-100" max="100" value="0" step="1"
+                    class="slider" id="scale-correction">
+                <span class='label'>масштаб</span>
+            </li>
+            <li>
+                <input type="range"
+                    min="-100" max="100" value="0"
+                    class="slider" id="zero-correction">
+                <span class='label'>ноль</span>
+            </li>
         </ul>
+
+        <table id="angulars">
+            <tr>
+                <td>(h &prime; &Prime;)</td>
+                <td><input type='text' id='hms' value='0' style='width:120px'
+                    oninput='translateAngular(null, null, this.value, null);'/></td>
+            </tr>
+            <tr>
+                <td>(h)</td>
+                <td><input type='text' id='hours' value='0' style='width:120px'
+                    oninput='translateAngular(this.value, null, null, null);'/></td>
+            </tr>
+            <tr>
+                <td>(&deg; &prime; &Prime;)</td>
+                <td><input type='text' id='dms' value='0' style='width:120px'
+                    oninput='translateAngular(null, null, null, this.value);'/></td>
+            </tr>
+            <tr>
+                <td>(&deg;)</td>
+                <td><input type='text' id='degrees' value='0' style='width:120px'
+                    oninput='translateAngular(null, this.value, null, null);'/></td>
+            </tr>
+        </table>
+
 
     </div>
 

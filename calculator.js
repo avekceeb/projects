@@ -38,7 +38,7 @@ var ScaleCorrection;
 var ZeroCorrection;
 
 // settings:
-var Width = 400;
+var Width = 500;
 var Height = 400;
 var PolarRadius = 180;
 var TickSize = 30;
@@ -47,33 +47,6 @@ var Colors = ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
 var Color = Colors[0];
 
 
-
-// some hours/minutes/seconds to degrees translation
-function hms2float(h, m, s) {
-    if (h < 0)
-        return h - m/60.0 - s/3600.0;
-    else
-        return s/3600.0 + m/60.0 + h;
-}
-
-function hours2deg(h) { return h * 15.0; }
-
-function deg2hours(deg) { return deg / 15.0 };
-
-function float2hms(deg) {
-    var degrees, minutes, seconds;
-    var is_positive = (deg >= 0);
-    degrees = Math.abs(deg)*3600;
-    minutes = Math.floor(degrees/60);
-    seconds = degrees % 60;
-    degrees = Math.floor(minutes/60);
-    minutes = minutes % 60;
-    // !!! if deg = -0.1
-    if (!is_positive) {
-        degrees = -degrees;
-    }
-    return [degrees, minutes, seconds];
-}
 
 function parseAngularString(v) {
     v = '' + v;
@@ -116,13 +89,13 @@ function translateAngular(hour, degree, hms, dms) {
         [h, hm, hs] = parseAngularString(hms);
         hrs = hms2float(h, hm, hs);
         deg = hours2deg(hrs);
-        [d, dm, ds] = float2hms(deg);
+        [d, dm, ds] = deg2hms(deg);
     }
     if (dms != null) {
         [d, dm, ds] = parseAngularString(dms);
         deg = hms2float(d, dm, ds);
         hrs = deg2hours(deg);
-        [h, hm, hs] = float2hms(hrs);
+        [h, hm, hs] = deg2hms(hrs);
     }
     if (hour != null) {
         hrs = parseFloat(hour);
@@ -130,8 +103,8 @@ function translateAngular(hour, degree, hms, dms) {
             hrs = 0;
         }
         deg = hours2deg(hrs);
-        [h, hm, hs] = float2hms(hrs);
-        [d, dm, ds] = float2hms(deg);
+        [h, hm, hs] = deg2hms(hrs);
+        [d, dm, ds] = deg2hms(deg);
     }
     if (degree != null) {
         deg = parseFloat(degree);
@@ -139,8 +112,8 @@ function translateAngular(hour, degree, hms, dms) {
             deg = 0;
         }
         hrs = deg2hours(deg);
-        [h, hm, hs] = float2hms(hrs);
-        [d, dm, ds] = float2hms(deg);
+        [h, hm, hs] = deg2hms(hrs);
+        [d, dm, ds] = deg2hms(deg);
     }
     // set values
     if (hour == null)
@@ -151,12 +124,6 @@ function translateAngular(hour, degree, hms, dms) {
         elDms.value = formatDMS(d, dm, ds);
     if (hms == null)
         elHms.value = formatHMS(h, hm, hs);
-}
-
-
-function createAngular() {
-    var table = document.createElement('table');
-
 }
 
 
@@ -192,71 +159,6 @@ function start() {
     N.value = '10';
     //DrawArea.setAttribute('onmousemove', 'showPoint(event)');
     //Marker = document.getElementById("marker");
-}
-
-
-function removeAll(e) {
-    while (e.firstChild) {
-        e.removeChild(e.lastChild);
-    }
-}
-
-
-function createSvgElement(n) {
-    return document.createElementNS("http://www.w3.org/2000/svg", n);
-}
-function svgEl(name, attrs) {
-    var e = document.createElementNS("http://www.w3.org/2000/svg", name);
-    if (attrs != undefined) {
-        for (var k in attrs) {
-            e.setAttribute(k, attrs[k]);
-        }
-    }
-    return e;
-}
-
-
-function svgCircle(parent, cx, cy, r, attrs) {
-    var c = svgEl('circle', {cx:cx, cy:cy, r:r});
-    if (null != parent) {
-        parent.appendChild(c);
-    }
-    if (attrs) {
-        for (var k in attrs) {
-            c.setAttribute(k, attrs[k]);
-        }
-    }
-    return c;
-}
-
-
-function svgStraightLine(parent, x0, y0, dx, dy, attrs) {
-    var c = svgEl('path');
-    c.setAttribute('d', 'M'+x0+','+y0+' l'+dx+','+dy);
-    if (null != parent) {
-        parent.appendChild(c);
-    }
-    if (attrs) {
-        for (var k in attrs) {
-            c.setAttribute(k, attrs[k]);
-        }
-    }
-    return c;
-}
-
-
-function svgLine(parent, d, attrs) {
-    var c = svgEl('path');
-    c.setAttribute('d', d);
-    if (null != parent) {
-        parent.appendChild(c);
-    }
-    if (attrs) {
-        for (var k in attrs) {
-            c.setAttribute(k, attrs[k]);
-        }
-    }
-    return c;
 }
 
 
@@ -315,10 +217,8 @@ function getEquidistant(x0, x1, n) {
 function setZero(x0, x1, y0, y1, sx, sy) {
     var tx = TickSize - x0*sx;
     var ty = Height + TickSize + y0*sy;
-    Draw.setAttribute('transform',
-        'translate(' + tx + ',' + ty + ') scale(1,-1)');
-    Grid.setAttribute('transform',
-        'translate(' + (TickSize - x0*sx) + ',' + (TickSize - y0*sy) + ')');
+    svgSetTransform(Draw, tx, ty, 1, -1);
+    svgSetTransform(Grid, TickSize - x0*sx, TickSize - y0*sy, 1, 1);
 }
 
 
@@ -350,50 +250,42 @@ function drawTicks(x0, x1, y0, y1, sx, sy) {
     var ty = y0*sy;
     // X
     var xticks = getTicks(x0, x1);
-    var xpath = createSvgElement('path');
     var d = [];
     var x, y;
     for (var i=0; i<xticks.length; i++) {
         x = xticks[i]*sx;
-        d.push('M'+x+','+ty+' l0,'+(Height+TickSize));
-        var txt = createSvgElement('text');
-        txt.setAttribute('x', x);
-        txt.setAttribute('y', ty+Height+TickSize);
-        txt.innerHTML = '' + xticks[i];
-        Grid.appendChild(txt);
+        d.push(`M${x},${ty} l0,${Height+TickSize}`);
+        svgEl(Grid, 'text', {x: x, y: ty+Height+TickSize})
+            .innerHTML = xticks[i];
     }
-    xpath.setAttribute('d', d.join(' '));
-    xpath.setAttribute('class', 'grid');
-    Grid.appendChild(xpath);
+    svgEl(Grid, 'path', {d: d.join(' '), 'class': 'grid'});
     // Y
     var yticks = getTicks(y0, y1);
-    var ypath = createSvgElement('path');
     var d = [];
     x = x0*sx-TickSize;
     for (var i=0; i<yticks.length; i++) {
         y = ty + (y1 - yticks[i])*sy;
-        d.push('M'+x+','+y+' l'+(Width+TickSize)+ ',0');
-        var txt = createSvgElement('text');
-        txt.setAttribute('x', x);
-        txt.setAttribute('y', y);
-        txt.innerHTML = '' + yticks[i];
-        Grid.appendChild(txt);
+        d.push(`M${x},${y} l${Width+TickSize},0`);
+        svgEl(Grid, 'text', {x: x, y: y})
+            .innerHTML = yticks[i];
     }
-    ypath.setAttribute('d', d.join(' '));
-    ypath.setAttribute('class', 'grid');
-    Grid.appendChild(ypath);
+    svgEl(Grid, 'path', {d: d.join(' '), 'class': 'grid'});
 }
 
 
 function gridToCartesian() {
-    // not needed...
-    Grid.setAttribute('transform', 'translate('+TickSize+','+TickSize+')');
+    svgSetTransform(Grid, TickSize, TickSize, 1, 1);
 }
 
+function setFrame() {
+    var transX = TickSize + Width / 2;
+    var transY = TickSize + Height / 2;
+    svgSetTransform(Grid, transX, transY, 1, 1);
+    svgSetTransform(Draw, transX, transY, 1, -1);
+}
 
 function gridToHorizontal() {
-    Grid.setAttribute('transform', 'translate('+(TickSize+Width/2)+','+(TickSize+Height/2)+') scale(1,-1)');
-    Draw.setAttribute('transform', 'translate('+(TickSize+Width/2)+','+(TickSize+Height/2)+') scale(1,-1)');
+    setFrame();
     svgCircle(Grid, 0, 0, PolarRadius, {class: 'grid'});
     var p = [];
     var x, y, z, d;
@@ -424,8 +316,7 @@ function gridToHorizontal() {
 
 
 function gridToPolar() {
-    Grid.setAttribute('transform', 'translate('+(TickSize+Width/2)+','+(TickSize+Height/2)+') scale(1,-1)');
-    Draw.setAttribute('transform', 'translate('+(TickSize+Width/2)+','+(TickSize+Height/2)+') scale(1,-1)');
+    setFrame();
     for (var r=PolarRadius; r>0; r-=PolarRadius/9) {
         var c = svgCircle(Grid, 0, 0, r, {class: 'grid'});
     }
@@ -454,23 +345,21 @@ function gridToEqualAreaProjection() {
 
 
 function addPoint(x, y, xreal, yreal) {
-    var p = createSvgElement('circle');
-    var t = createSvgElement('title');
+    var p = svgEl(Draw, 'circle');
+    var t = svgEl(p, 'title');
     t.innerHTML = 'x: ' + xreal + ' y: ' + yreal;
-    p.appendChild(t);
     p.setAttribute('cx', x);
     p.setAttribute('cy', y);
     p.setAttribute('r', '1%');
     p.setAttribute('class', 'point');
     p.setAttribute('fill', Color);
     //p.setAttribute('onmouseover', 'showPoint(this,'+xreal+','+yreal+')');
-    Draw.appendChild(p);
 }
 
 
 function drawSeries(xs, ys, sx, sy) {
     // TODO: options: o * V --
-    var path = createSvgElement('path');
+    var path = svgEl(Draw, 'path');
     var p = [];
     var x, y;
     for (var i=0; i<xs.length; i++) {
@@ -481,11 +370,6 @@ function drawSeries(xs, ys, sx, sy) {
     }
     path.setAttribute('d', "M" + p.join(" L"));
     path.setAttribute('stroke', Color);
-    Draw.appendChild(path);
-}
-
-
-function moveMarker(x, y) {
 }
 
 
@@ -540,17 +424,6 @@ function polarRose(f) {
 }
 
 
-function sphericalToCartesian(theta, fi, r) {
-    var t = RadInDeg * theta;
-    var f = RadInDeg * fi;
-    var sin_t = Math.sin(t);
-    return [
-        r * sin_t * Math.cos(f),
-        r * sin_t * Math.sin(f),
-        r * Math.cos(t) ];
-}
-
-
 function sphericalProjectionSchmidt(theta, fi, r) {
     var t = RadInDeg * theta;
     var f = RadInDeg * fi;
@@ -570,12 +443,6 @@ function sphericalProjectionWulf(theta, fi, r) {
         r * sin_t * Math.cos(f),
         r * sin_t * Math.sin(f),
         r * Math.cos(t) ];
-}
-
-
-
-function polarToCartesian(f, r) {
-    return [r * Math.cos(RadInDeg*f), r * Math.sin(RadInDeg*f)];
 }
 
 

@@ -17,7 +17,6 @@ function arccos(x) {
     return Math.acos(x) / RadInDeg;
 }
 
-
 function hours2deg(h) {
     return h * 15.0;
 }
@@ -38,6 +37,29 @@ function deg2hms(deg) {
         degrees = -degrees;
     }
     return [degrees, minutes, seconds];
+}
+
+function hms2float(h, m, s) {
+    if (h < 0)
+        return h - m/60.0 - s/3600.0;
+    else
+        return s/3600.0 + m/60.0 + h;
+}
+
+
+function polarToCartesian(f, r) {
+    return [r * Math.cos(RadInDeg*f), r * Math.sin(RadInDeg*f)];
+}
+
+
+function sphericalToCartesian(theta, fi, r) {
+    var t = RadInDeg * theta;
+    var f = RadInDeg * fi;
+    var sin_t = Math.sin(t);
+    return [
+        r * sin_t * Math.cos(f),
+        r * sin_t * Math.sin(f),
+        r * Math.cos(t) ];
 }
 
 
