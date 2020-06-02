@@ -1,65 +1,10 @@
 
 
-var Debug = true;
 // интервал таймера
 var dT = 100;
-var RadInDeg = Math.PI/180;
 // угловая скорость (градусов / dT )
 var V = 5;
-
-
-///////////// common /////////////////
-
-var Colors = {
-    c: ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
-        '#20B2AA', '#A52A2A', '#1E90FF', '#8B008B'],
-    i: -1,
-    next: function() {
-        if (this.i < 0) {
-            this.i = Math.floor(Math.random()*this.c.length);
-        } 
-        return this.c[(this.i++)%this.c.length];
-    }
-};
-
-function getSizes() {
-    var win = window,
-        doc = document,
-        docElem = doc.documentElement,
-        body = doc.getElementsByTagName('body')[0],
-        x = win.innerWidth || docElem.clientWidth || body.clientWidth,
-        y = win.innerHeight|| docElem.clientHeight|| body.clientHeight;
-    return [x, y];
-}
-
-
-dbg = function() {
-    if (!Debug) {
-        return;
-    }
-    var args = Array.prototype.slice.call(arguments);
-    console.log(args.join(' | '));
-}
-
-
-function removeAll(e) {
-    while (e.firstChild) {
-        e.removeChild(e.lastChild);
-    }
-    return e;
-}
-
-
-function svgEl(name, attrs) {
-    var e = document.createElementNS("http://www.w3.org/2000/svg", name);
-    if (attrs != undefined) {
-        for (var k in attrs) {
-            e.setAttribute(k, attrs[k]);
-        }
-    }
-    return e;
-}
-
+var Color = colors();
 
 
 /*
@@ -74,7 +19,7 @@ function svgEl(name, attrs) {
  */
 
 function Orbital(parent, a, e, o, m, r) {
-    
+
     ////// параметры орбиты ////////////
     this.a = a;
 
@@ -103,7 +48,7 @@ function Orbital(parent, a, e, o, m, r) {
 
     /////////// собственные спутники /////////////////
     this.orbits = [];
-    
+
     // svg
     this.svgGroup = null;
     this.svg
@@ -131,9 +76,9 @@ function Orbital(parent, a, e, o, m, r) {
             this.orbits[i].tick(dt*5);
         }
     }
-    
+
     // группа орбиты
-    var g = svgEl('g', {
+    this.svg0 = svgEl(parent == null ? null : parent.svgGroup, 'g', {
         class: 'orbit',
         // сдвинуть влево на фокальное расстояние (c = e*a)
         // чтобы фокус был в 0
@@ -141,27 +86,23 @@ function Orbital(parent, a, e, o, m, r) {
         // повернуть орбиту на аргумент перицентра
         // против часовой
         ' rotate(-'+this.o+' '+(this.e*this.a)+' 0)'});
-    this.svg0 = g;
     // орбита
-    var e = svgEl('ellipse', {
+    svgEl(this.svg0, 'ellipse', {
         cx: 0, cy: 0, rx: this.a, ry: this.b,
         fill: 'none', stroke: '#D0D0D0'});
     // группа тела
-    this.svgGroup = svgEl('g', { class: 'planet', transform: '' });
+    this.svgGroup = svgEl(this.svg0, 'g', { class: 'planet', transform: '' });
     // тело
-    var b = svgEl('circle', {
+    svgEl(this.svgGroup, 'circle', {
         cx: 0, cy: 0, r: this.r,
-        fill: Colors.next(), stroke: 'none'});
-    this.svgGroup.appendChild(b);
-    g.appendChild(e);
-    g.appendChild(this.svgGroup);
+        fill: Color.next().value, stroke: 'none'});
     this.updatePos();
-    
+
     if (parent == null) {
         return;
     }
-    
-    parent.svgGroup.appendChild(g); 
+
+    // parent.svgGroup.appendChild(g);
     parent.orbits.push(this);
 
 };
@@ -188,35 +129,34 @@ function tick() {
 */
 
 var Img = {
-    
+
     svg: null, w: 0, h: 0,
-    
+
     // центр системы
     center: null,
-    
+
     init: function() {
-        
+
         // очищаем
        // this.orbits.splice(0, this.orbits.length);
         var page = document.getElementsByTagName("body")[0];
         removeAll(page);
-        
+
         // размеры
         [w, h] = getSizes();
         this.w = w - 30;
         this.h = h - 30;
-        
+
         // главный элемент
-        this.svg = svgEl('svg', {
+        this.svg = svgEl(page, 'svg', {
             width: this.w, height: this.h,
             version: '1.1',
             viewBox: [0,0,this.w,this.h].join(' ')}
             );
-        page.append(this.svg);
-        
+
         // центральное тело
         this.center = new Orbital(null, 0, 0, 0, 0);
-        this.center.svg0.setAttribute('transform', 'translate('+(this.w/2)+','+(this.h/2)+')');
+        svgSetTransform(this.center.svg0, this.w/2, this.h/2, 1, 1);
         this.svg.appendChild(this.center.svg0);
         //
         page.onclick = this.toggle;
@@ -236,11 +176,11 @@ var Img = {
                     break;
                 default:
                     return;
-            } 
+            }
         };
         return this;
     },
-    
+
     tick: function() {
         for (var i in this.center.orbits) {
             this.center.orbits[i].tick(V * RadInDeg);
@@ -257,7 +197,7 @@ var Img = {
         }
         tick();
     },
-    
+
     demo2: function() {
         for (var i=5; i<90; i+=5) {
             new Orbital(Img.center, 350*Math.sin(RadInDeg*i), 0, 0);
@@ -277,8 +217,6 @@ var Img = {
 };
 
 function start() {
-    Img.init();   
+    Img.init();
     Img.demo();
 }
-
-
