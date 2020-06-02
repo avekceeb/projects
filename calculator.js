@@ -27,10 +27,10 @@ TODO:
 */
 
 // page elements:
-var X0, X1, N;
+// все это должно быть запрятано подальше
+// после того как решу как лучше все это оформить
 var Marker;
 var Value;
-var Func;
 var Draw, DrawArea, Grid;
 var Legend;
 var Scale;
@@ -58,13 +58,13 @@ function parseAngularString(v) {
     v = v.replace(/,/g, '.');
     v = v.trim();
     [h, m, s] = v.split(/\s+/g, 3);
-    if (h === undefined || Number.isNaN(parseInt(h))) {
+    if (h === undefined || isNaN(parseInt(h))) {
         h = 0;
     }
-    if (m === undefined || Number.isNaN(parseInt(m))) {
+    if (m === undefined || isNaN(parseInt(m))) {
         m = 0;
     }
-    if (s === undefined || Number.isNaN(parseFloat(s))) {
+    if (s === undefined || isNaN(parseFloat(s))) {
         s = 0;
     }
     return [parseInt(h), parseInt(m), parseFloat(s)];
@@ -79,10 +79,10 @@ function formatHMS(h, m, s) {
 }
 
 function translateAngular(hour, degree, hms, dms) {
-    var elHours = document.getElementById("hours");
-    var elDegrees = document.getElementById("degrees");
-    var elDms = document.getElementById("dms");
-    var elHms = document.getElementById("hms");
+    var elHours = docEl("#hours");
+    var elDegrees = docEl("#degrees");
+    var elDms = docEl("#dms");
+    var elHms = docEl("#hms");
     var h=0, hm=0, hs=0, d=0, dm=0, ds=0, hrs=0, deg=0;
     if (hms != null) {
         [h, hm, hs] = parseAngularString(hms);
@@ -128,19 +128,13 @@ function translateAngular(hour, degree, hms, dms) {
 
 function start() {
     translateAngular('0h', null, null, null);
-    Value = document.getElementById("value");
-    Func = document.getElementById("function");
-    Draw = document.getElementById("draw");
-    DrawArea = document.getElementById("draw-area");
-    Grid = document.getElementById("grid");
-    Legend = document.getElementById("legend");
-    ScaleCorrection = document.getElementById("scale-correction");
-    ZeroCorrection = document.getElementById("zero-correction");
-    X0 = document.getElementById("x0");
-    X1 = document.getElementById("x1");
-    N = document.getElementById("count");
-    Func.value = 'x';
-    N.value = '10';
+    Value = docEl("#value");
+    Draw = docEl("#draw");
+    DrawArea = docEl("#draw-area");
+    Grid = docEl("#grid");
+    Legend = docEl("#legend");
+    ScaleCorrection = docEl("#scale-correction");
+    ZeroCorrection = docEl("#zero-correction");
     //DrawArea.setAttribute('onmousemove', 'showPoint(event)');
     //Marker = document.getElementById("marker");
 }
@@ -160,21 +154,6 @@ function getTicks(x0, x1) {
         t.push(x);
     }
     return t;
-}
-
-
-function getX0() {
-    return parseFloat(X0.value);
-}
-
-
-function getX1() {
-    return parseFloat(X1.value);
-}
-
-
-function getN() {
-    return parseFloat(N.value);
 }
 
 
@@ -206,13 +185,6 @@ function setZero(x0, x1, y0, y1, sx, sy) {
 }
 
 
-function getFunction() {
-    // return new Function('x', 'y', 'return x + y');
-    eval('f = function(x){ return (' + Func.value + ');}');
-    return f;
-}
-
-
 function showPoint(e) {
     var rect = e.target.getBoundingClientRect();
     var x = e.clientX - rect.left;
@@ -224,7 +196,7 @@ function showPoint(e) {
 
 function addLegend() {
     var l = document.createElement('li');
-    l.innerHTML = "f(x)=" + Func.value;
+    l.innerHTML = '-----';
     l.setAttribute('style', "color:" + Color);
     Legend.appendChild(l);
 }
@@ -314,7 +286,7 @@ function gridToPolar() {
 
 function addPoint(x, y, xreal, yreal) {
     var p = svgEl(Draw, 'circle', {
-        'cx': x, 'cy': y, 'r': '1%', 'class': 'point', 'fill': Color});
+        'cx': x, 'cy': y, 'r': '0.5%', 'class': 'point', 'fill': Color});
     // TODO: format 0.00001 ....
     svgEl(p, 'title').innerHTML = `x: ${xreal.toFixed(2)} y: ${yreal.toFixed(2)}`;
     //p.setAttribute('onmouseover', 'showPoint(this,'+xreal+','+yreal+')');
@@ -335,19 +307,7 @@ function drawSeries(xs, ys, sx, sy) {
 }
 
 
-function drawFunction() {
-    var x0, x1, y0, y1;
-    var x0 = getX0();
-    var x1 = getX1();
-    var n = getN();
-    var xs = getEquidistant(x0, x1, n);
-    var f = getFunction();
-    if (typeof(f) !== 'function') {
-        // TODO
-        alert("Error: invalid function!");
-        return;
-    }
-    var ys = xs.map(f);
+function drawXY(xs, ys) {
     x0 = Math.min.apply(null, xs);
     x1 = Math.max.apply(null, xs);
     y0 = Math.min.apply(null, ys);
@@ -359,7 +319,6 @@ function drawFunction() {
     removeAll(Grid);
     removeAll(Legend);
     gridToCartesian();
-    //
     Color = color.next().value;
     setZero(x0, x1, y0, y1, sx, sy);
     drawTicks(x0, x1, y0, y1, sx, sy);
@@ -367,36 +326,36 @@ function drawFunction() {
     addLegend();
 }
 
+function drawFunction() {
+    var x0 = docFloat('#x0');
+    var x1 = docFloat('#x1');
+    var n = docInt('#count');
+    var xs = getEquidistant(x0, x1, n);
+    var f = docFunction('#function', 'x');
+    if (typeof(f) !== 'function') {
+        // TODO
+        alert("Error: invalid function!");
+        return;
+    }
+    var ys = xs.map(f);
+    drawXY(xs, ys);
+}
+
 
 function drawParametricFunction() {
-    var xt = new Function('t', 'return (' + document.getElementById("function-x-t").value + ')');
-    var yt = new Function('t', 'return (' + document.getElementById("function-y-t").value + ')');
+    var xt = docFunction("#function-x-t", 't');
+    var yt = docFunction("#function-y-t", 't');
     if (typeof(xt) !== 'function' || typeof(yt) !== 'function') {
         alert("Error: invalid function!");
         return;
     }
-    var t0 = parseFloat(document.getElementById("t0").value);
-    var t1 = parseFloat(document.getElementById("t1").value);
-    var n = parseInt(document.getElementById("count-t").value);
+    var t0 = docFloat("#t0");
+    var t1 = docFloat("#t1");
+    var n = docInt("#count-t");
     var ts = getEquidistant(t0, t1, n);
     var xs = ts.map(xt);
     var ys = ts.map(yt);
-    x0 = Math.min.apply(null, xs);
-    x1 = Math.max.apply(null, xs);
-    y0 = Math.min.apply(null, ys);
-    y1 = Math.max.apply(null, ys);
-    var sx = Width / (x1 - x0);
-    var sy = Height / (y1 - y0);
-    // TODO: смотреть на флаг
-    removeAll(Draw);
-    removeAll(Grid);
-    removeAll(Legend);
-    gridToCartesian();
-    Color = color.next().value;
-    setZero(x0, x1, y0, y1, sx, sy);
-    drawTicks(x0, x1, y0, y1, sx, sy);
-    drawSeries(xs, ys, sx, sy);
-    addLegend();
+    drawXY(xs, ys);
 }
 
 ////////////////////////////
@@ -489,4 +448,12 @@ function projectionEqualArea() {
     removeAll(Grid);
     removeAll(Legend);
     gridToEqualAreaProjection();
+}
+
+
+
+function showShadow() {
+    var xs, ys;
+    [xs, ys] = getShadowTrack(5);
+    drawXY(xs, ys);
 }

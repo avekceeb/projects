@@ -12,9 +12,9 @@ var mapHeight = 360;
 
 function lon2xMap(lon) {
     var x = lon;
-    if (x > 360)
+    if (x > 180)
         x -= 360;
-    if (x < -360)
+    if (x < -180)
         x += 360;
     return x;
 }
@@ -33,16 +33,13 @@ function drawShadow() {
     var midnightLon = middayLon + 180;
     var midnightX = lon2xMap(midnightLon);
     svgStraightLine(g, midnightX, -180, 0, 180*2, {stroke: 'blue', 'stroke-opacity':0.3, 'stroke-width':'0.5px'});
-    // TODO:
-    // форма кривой края рассвет-закат
-    // синусоида ? в равноденствии должна быть верт прямой...
-    // var a = [];
-    // for (let i=-180; i<=180; i+=5) {
-    //     a.push(i);
-    // }
-    // svgPathFromFunction(g, function(x){return 90*cos(x);}, a, {fill:'none', stroke: '#00ff00'});
-    // svgPathFromFunction(g, function(x){return arccos(cos(x)*cos(80))-90;}, a, {fill:'none', stroke: '#ff0000'});
-
+    //svgLine(g, 'M0,0 l0,100 l100,0 l0,-100 L0,0', {stroke: 'black', 'stroke-opacity':0.3, 'stroke-width':'0.5px', fill:'yellow'});
+    var xs, ys;
+    [xs, ys] = getShadowTrack(23);
+    svgSetTransform(
+        svgLine(g, svgPathFromXY(xs, ys), {stroke: 'none',
+        fill: '#4B0082', 'fill-opacity':0.3,
+    }), middayLon-360, 0, 1, 1);
 }
 
 

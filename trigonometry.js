@@ -71,9 +71,59 @@ function sphericalToCartesian(theta, fi, r) {
 }
 
 
-// arctg(tg(t)/sin(1))
-//
-// 90-arccos(cos(1)/sqrt(1 + tg(t)*tg(t)))
+// i - наклонение орбиты
+//     или угол падения лучей
+// TODO: заменить if
+//       i = 0 !!!
+
+function circleProjectionAz(t, i) {
+    let add = 0;
+    if (t>360) {
+        add = t - (t%360);
+        t %= 360;
+    }
+    var x = arctg(tg(t)/sin(i));
+    if (t<-90) {
+        x -= 180;
+    }
+    if (t>90 && t<=270) {
+        x += 180;
+    }
+    if (t>270) {
+        x += 360;
+    }
+    return x + add;
+}
+
+
+function circleProjectionAlt(t, i) {
+    if (t>360) {
+        t %= 360;
+    }
+    var y = 90 - arccos(cos(i)/sqrt(1 + tg(t)*tg(t)));
+    if (t<90 && t>-90) {
+        y = -y;
+    }
+    if (t>270) {
+        y = -y;
+    }
+    return y;
+}
+
+// дешевый трюк
+function getShadowTrack(i) {
+    var ts = getEquidistant(0, 720, 200);
+    var xs = ts.map(function(t){return circleProjectionAz(t, i);});
+    var ys = ts.map(function(t){return circleProjectionAlt(t, i);});
+    xs.unshift(0);
+    ys.unshift(-90);
+    xs.push(720);
+    ys.push(-90);
+    xs.push(0);
+    ys.push(-90);
+    return [xs, ys];
+}
+
 
 // module exporting
 if (typeof module !== 'undefined') {

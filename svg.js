@@ -57,6 +57,13 @@ function svgPathFromFunction(parent, f, xs, attrs) {
     return p;
 }
 
+function svgPathFromXY(xs, ys) {
+    let points = [];
+    for (let i in xs) {
+        points.push(`${xs[i]},${ys[i]}`);
+    }
+    return 'M ' + points.join(' L');
+}
 
 // module exporting
 /*

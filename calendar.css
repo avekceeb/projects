@@ -67,7 +67,7 @@
 }
 #earthmap g.country {
     opacity:1;
-    fill:#D0D0D0;
+    fill:#a0a0a0;
     fill-opacity:1;
     fill-rule:evenodd;
     stroke:none;
@@ -80,4 +80,7 @@
 }
 #earthmap g.USA {
     fill: #B0C4DE !important;
+}
+#earthmap g.ATA {
+    fill: #ffffff !important;
 }

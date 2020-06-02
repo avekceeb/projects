@@ -55,10 +55,8 @@
             <li>y = f(x)</li>
             <li>
                 <span class='label'>f(x) = </span>
-                <textarea id="function" rows="5" cols="30" style='width:200px; height:50px; display:block;'>
-
-                    x
-
+                <textarea id="function" spellcheck="false" rows="5" cols="30"
+                    style='width:200px; height:50px; display:block;'>x
                 </textarea>
                 <!--input type="text" id='function' name="function"
                         list="functionslist">
@@ -92,11 +90,11 @@
             <li>x = f(t); y = g(t);</li>
             <li>
                 <span class='label'>x(t) = </span>
-                <textarea id="function-x-t" rows="5" cols="30"
+                <textarea id="function-x-t" rows="5" cols="30" spellcheck="false"
                     style='width:200px; height:50px; display:block;'>2*t
                 </textarea>
                 <span class='label'>y(t) = </span>
-                <textarea id="function-y-t" rows="5" cols="30"
+                <textarea id="function-y-t" rows="5" cols="30" spellcheck="false"
                     style='width:200px; height:50px; display:block;'>3*t
                 </textarea>
             </li>
@@ -130,6 +128,9 @@
             </li>
             <li>
                 <a href="#" onclick="horizontalFunction();"><span>Горизонтальные</span></a>
+            </li>
+            <li>
+                <a href="#" onclick="showShadow();"><span>тень</span></a>
             </li>
             <li>
                 <input type="range" oninput='setScale(this.value)'
