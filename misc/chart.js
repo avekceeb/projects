@@ -44,7 +44,6 @@ function Svg(id, w, h) {
         this.set('r', r);
     }
 
-
     function Rectangle(x, y, w, h, id) {
         SvgElement.call(this, 'rect', id);
         this.set('x', x);
@@ -60,15 +59,18 @@ function Svg(id, w, h) {
         this.e.innerHTML = value;
     }
 
-    function SvgElement(tag, id) {
+    function SvgElement(tag, id, find) {
         this.e = null;
-        if (id)
+        this.p = null;
+        if (id) {
             this.e = document.getElementById(id);
-        if (!this.e) {
+        }
+        if ((!this.e) && (!find)) {
             this.e = document.createElementNS("http://www.w3.org/2000/svg", tag);
             if (id)
                 this.e.setAttribute('id', id);
         }
+
         this.transform = function(tx, ty, sx, sy) {
             if (typeof sx === 'undefined') {
                 sx = 1;
@@ -78,27 +80,47 @@ function Svg(id, w, h) {
                 `translate(${tx},${ty}) scale(${sx},${sy})`);
             return this;
         }
+
         this.set = function(k, v) {
-            // TODO: if (typeof k === 'Object')
-            this.e.setAttribute(k, v);
+            if (typeof k === 'object') {
+                for (let i in k) {
+                    this.e.setAttribute(i, k[i]);
+                }
+            } else {
+                this.e.setAttribute(k, v);
+            }
             return this;
         }
+
+        this.find = function(id) {
+            return new SvgElement(null, id, true);
+        }
+
         this.child = function(parent) {
             if (typeof parent === 'string') {
-                parent = document.getElementById(parent);
+                this.p = new SvgElement(null, parent);
+                this.p.e.appendChild(this.e);
+            } else if (!(parent instanceof Element)) {
+                this.p = parent;
+                this.p.e.appendChild(this.e);
+            } else {
+                parent.appendChild(this.e);
             }
-            if (!(parent instanceof Element)) {
-                parent = parent.e;
-            }
-            parent.appendChild(this.e);
+            // TODO: else
             return this;
         }
+
+        this.parent = function() {
+            return this.p;
+        }
+
         this.clear = function() {
             while (this.e.firstChild) {
                 this.e.removeChild(this.e.lastChild);
             }
             return this;
         }
+
         this.color = function(color) {
             if (this instanceof Line || this instanceof Path) {
                 this.e.setAttribute('stroke', color);
@@ -108,9 +130,13 @@ function Svg(id, w, h) {
             }
             return this;
         }
+
         this.g = function(id) {
+            // Should these methods
+            // return new objects???
             return (new G(id)).child(this);
-        };
+            // return this;
+        }
 
         this.line = function(x0, y0, x1, y1, id) {
             return (new Line(x0, y0, x1, y1, id)).child(this);
@@ -118,34 +144,34 @@ function Svg(id, w, h) {
 
         this.vline = function(x0, y0, l, id) {
             return (new Line(x0, y0, 0, l, id)).child(this);
-        };
+        }
 
         this.hline = function(x0, y0, l, id) {
             return (new Line(x0, y0, l, 0, id)).child(this);
-        };
+        }
 
         this.path = function(xs, ys, id) {
             return (new Path(xs, ys, id)).child(this);
-        };
+        }
 
         this.circle = function(x, y, r, id) {
             return (new Circle(x, y, r, id)).child(this);
-        };
+        }
 
         this.rectangle = function(x, y, w, h, id) {
             return (new Rectangle(x, y, w, h, id)).child(this);
-        };
+        }
 
         this.text = function(x, y, value, id) {
             return (new Text(x, y, value, id)).child(this);
-        };
+        }
 
         this.title = function(value, id) {
             return (new (function(){
                 SvgElement.call(this, 'title', id);
                 this.e.innerHTML = value;
             })).child(this);
-        };
+        }
         // this.finish = function() {
         //     delete this.e;
         //     delete this.transform;
@@ -269,13 +295,11 @@ function Chart(id, w, h, type) {
             let xs = series.xs.map(function(x){return x*Sx;});
             let ys = series.ys.map(function(x){return x*Sy;});
             if (type.indexOf('line') !== -1) {
-                Chart.path(xs, ys)
-                    .color(color);
+                Chart.path(xs, ys).color(color);
             }
             if (type.indexOf('dot') !== -1) {
                 for (let i in xs) {
-                    let d = Chart.circle(xs[i], ys[i], 2)
-                        .color(color);
+                    let d = Chart.circle(xs[i], ys[i], 2).color(color);
                     if (type.indexOf('tip') !== -1) {
                         // value in real scale
                         d.title(`${series.xs[i]} , ${series.ys[i]}`);
@@ -291,6 +315,8 @@ function Chart(id, w, h, type) {
     }
 
     Chart = Root.g().transform(Pad, Pad)
+        .rectangle(0, 0, Width, Height).set({fill: 'none', stroke: '#d0d0d0'})
+        .parent()
         // initially: x - not inverted ; y - inverted
         .g('chart').transform(0, Height, 1, -1);
 }
@@ -321,12 +347,6 @@ function getEquidistant(x0, x1, n) {
 
 var B = document.querySelector('body');
 B.onload = function() {
-    // var s = (new Svg('map', 400, 400)).child(B);
-    // var g = s.g('grid');
-    // g.line(20, 20, 100, 100).color('red');
-    // g.circle(100, 100, 50).color('yellow');
-    // g.rectangle(200, 200, 100, 100).color('#dfdfdf');
-
     let xs = getEquidistant(-100, 200, 20);
     let ys = xs.map(function(x){return x*x/(200);});
 
