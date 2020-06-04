@@ -60,6 +60,8 @@ function Svg(id, w, h) {
     }
 
     function SvgElement(tag, id, find) {
+        // TODO: set / dont set props/meth depending on tag
+        //this.tag = tag;
         this.e = null;
         this.p = null;
         if (id) {
@@ -92,9 +94,9 @@ function Svg(id, w, h) {
             return this;
         }
 
-        this.find = function(id) {
-            return new SvgElement(null, id, true);
-        }
+        // this.find = function(id) {
+        //     return new SvgElement(null, id, true);
+        // }
 
         this.child = function(parent) {
             if (typeof parent === 'string') {
@@ -195,6 +197,31 @@ function Svg(id, w, h) {
 
 function Chart(id, w, h, type) {
 
+    var Type = 'xy', // xy | polar
+        XInverted = false,
+        YInverted = true,
+        Pad = 30, // px
+        Sx = 1,
+        Sy = 1,
+        Data = [], // array of series [x] [y], [x] [y]...
+        // TODO: if w < pad ???
+        Root = new Svg(id, w, h),
+        Width = w - Math.floor(Pad*1.3),
+        Height = h - Math.floor(Pad*1.3),
+        Grid = null,
+        Chart = null,
+        Legend = null;
+
+    var Colors = (function*() {
+        var c = ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
+            '#20B2AA', '#A52A2A', '#1E90FF', '#8B008B'];
+        var i = Math.floor(Math.random()*c.length);
+        while (true) {
+            yield c[(i++) % c.length];
+        }
+    })();
+
+
     function Series(xs, ys, attrs) {
         if (xs instanceof Array) {
             // Array
@@ -234,32 +261,6 @@ function Chart(id, w, h, type) {
         }
     }
 
-    var Type = 'xy', // xy | polar
-        XInverted = false,
-        YInverted = true,
-        Pad = 30, // px
-        Sx = 1,
-        Sy = 1,
-        Data = [], // array of series [x] [y], [x] [y]...
-        // TODO: if w < pad ???
-        Root = new Svg(id, w, h);
-    var Width = w - Math.floor(Pad*1.3),
-        Height = h - Math.floor(Pad*1.3);
-
-    var Grid = null,
-        Chart = null,
-        Legend = null;
-
-    var Colors = (function*() {
-        var c = ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
-            '#20B2AA', '#A52A2A', '#1E90FF', '#8B008B'];
-        var i = Math.floor(Math.random()*c.length);
-        while (true) {
-            yield c[(i++) % c.length];
-        }
-    })();
-
-
     function rescale() {
         if (Data.length == 0)
             return;
@@ -286,14 +287,18 @@ function Chart(id, w, h, type) {
         return this;
     }
 
-    this.refresh = function() {
+    this.nodata = function() {
+        Data.splice(0, Data.length);
+    }
+
+    this.show = function() {
         Chart.clear();
         rescale();
         for (let series of Data) {
             let type = series.type || 'line-dot-tip';
             let color = series.color ? series.color : Colors.next().value;
-            let xs = series.xs.map(function(x){return x*Sx;});
-            let ys = series.ys.map(function(x){return x*Sy;});
+            let xs = series.xs.map(x => x*Sx);
+            let ys = series.ys.map(x => x*Sy);
             if (type.indexOf('line') !== -1) {
                 Chart.path(xs, ys).color(color);
             }
@@ -348,11 +353,10 @@ function getEquidistant(x0, x1, n) {
 var B = document.querySelector('body');
 B.onload = function() {
     let xs = getEquidistant(-100, 200, 20);
-    let ys = xs.map(function(x){return x*x/(200);});
-
+    let ys = xs.map(x => x*x/(30));
     (new Chart('chart', 800, 600))
         .child(B)
-        .data(xs, ys)
-        .data(xs, function(x){return x*2;}, {type: 'dot'})
-        .refresh();
+        .data(xs.map(x => x/10), ys)
+        .data(xs, x => x*2, {type: 'dot'})
+        .show();
 };
