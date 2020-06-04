@@ -66,6 +66,7 @@ function Svg(id, w, h) {
         this.p = null;
         if (id) {
             this.e = document.getElementById(id);
+            // TODO: check tag ???
         }
         if ((!this.e) && (!find)) {
             this.e = document.createElementNS("http://www.w3.org/2000/svg", tag);
@@ -201,16 +202,18 @@ function Chart(id, w, h, type) {
         XInverted = false,
         YInverted = true,
         Pad = 30, // px
-        Sx = 1,
-        Sy = 1,
+        Sx = 1, Sy = 1,
+        X0 = 0, X1 = 0, Y0 = 0, Y1 = 0,
+        X2P = function(x){return x*Sx;},
+        Y2P = function(y){return y*Sy;},
         Data = [], // array of series [x] [y], [x] [y]...
         // TODO: if w < pad ???
         Root = new Svg(id, w, h),
         Width = w - Math.floor(Pad*1.3),
         Height = h - Math.floor(Pad*1.3),
-        Grid = null,
-        Chart = null,
-        Legend = null;
+        GridX = false,
+        GridY = false,
+        Chart = null;
 
     var Colors = (function*() {
         var c = ['#FF69B4', '#6B8E23', '#F08080', '#2E8B57', '#FFA500',
@@ -244,7 +247,7 @@ function Chart(id, w, h, type) {
             }
         } else if (typeof ys === 'function') {
             this.ys = [];
-            for (let i of xs) {
+            for (let i of this.xs) {
                 this.ys.push(ys(i));
             }
         } else {
@@ -261,25 +264,46 @@ function Chart(id, w, h, type) {
         }
     }
 
+    function ticks(x0, x1) {
+        var t = [];
+        var dx = Math.pow(10, Math.round(Math.log10((x1 - x0)/10)));
+        var count = (x1 - x0)/dx;
+        if (count > 10) {
+            dx *= 5;
+        } else if (count < 2) {
+            dx /= 2;
+        }
+        var t0 = Math.round(x0/dx + 0.5)*dx;
+        for (var x=t0; x<x1; x+=dx) {
+            t.push(x);
+        }
+        return t;
+    }
+
     function rescale() {
-        if (Data.length == 0)
+        if (Data.length == 0) {
+            X0 = 0;
+            X1 = 0;
+            Y0 = 0;
+            Y1 = 0;
             return;
+        }
         // TODO: polar ???
         // find ranges for X and Y
-        let x0 = Data[0].x0,
-            x1 = Data[0].x1,
-            y0 = Data[0].y0,
-            y1 = Data[0].y1;
+        X0 = Data[0].x0;
+        X1 = Data[0].x1;
+        Y0 = Data[0].y0;
+        Y1 = Data[0].y1;
         for (let i=1; i<Data.length; i++) {
-            x0 = Math.min(x0, Data[i].x0);
-            x1 = Math.max(x1, Data[i].x1);
-            y0 = Math.min(y0, Data[i].y0);
-            y1 = Math.max(y1, Data[i].y1);
+            X0 = Math.min(X0, Data[i].x0);
+            X1 = Math.max(X1, Data[i].x1);
+            Y0 = Math.min(Y0, Data[i].y0);
+            Y1 = Math.max(Y1, Data[i].y1);
         }
-        Sx = Width / (x1 - x0);
-        Sy = Height / (y1 - y0);
+        Sx = Width / (X1 - X0);
+        Sy = Height / (Y1 - Y0);
         // TODO: Tx Ty depends on X Y Inverted
-        Chart.transform(-x0*Sx, Height+y0*Sy, -1*XInverted+(!XInverted), -1*YInverted+(!YInverted));
+        Chart.transform(-X0*Sx, Height+Y0*Sy, -1*XInverted+(!XInverted), -1*YInverted+(!YInverted));
     }
 
     this.data = function(xs, ys, name, attrs) {
@@ -289,16 +313,45 @@ function Chart(id, w, h, type) {
 
     this.nodata = function() {
         Data.splice(0, Data.length);
+        return this;
+    }
+
+    this.grid = function(type) {
+        // TODO : set type
+        GridX = true;
+        GridY = true;
+        return this;
+    }
+
+    this.nogrid = function() {
+        GridX = false;
+        GridY = false;
+        return this;
     }
 
     this.show = function() {
         Chart.clear();
+        // find ranges and scales for current data
         rescale();
+        if (X0==X1 || Y0==Y1) {
+            return; // ranges invalid
+        }
+        // draw grid
+        if (GridX && GridY) {
+            let grid = Chart.g('grid');
+            for (let t of ticks(X0, X1)) {
+                grid.vline(X2P(t), Y2P(Y0), Y2P(Y1-Y0)).set({stroke: '#d0d0d0', fill: 'none'});
+            }
+            for (let t of ticks(Y0, Y1)) {
+                grid.hline(X2P(X0), Y2P(t), X2P(X1-X0)).set({stroke: '#d0d0d0', fill: 'none'});
+            }
+        }
+        // draw data
         for (let series of Data) {
             let type = series.type || 'line-dot-tip';
             let color = series.color ? series.color : Colors.next().value;
-            let xs = series.xs.map(x => x*Sx);
-            let ys = series.ys.map(x => x*Sy);
+            let xs = series.xs.map(X2P);
+            let ys = series.ys.map(Y2P);
             if (type.indexOf('line') !== -1) {
                 Chart.path(xs, ys).color(color);
             }
@@ -319,11 +372,14 @@ function Chart(id, w, h, type) {
         return this;
     }
 
-    Chart = Root.g().transform(Pad, Pad)
+    Chart = Root.g('ticks').transform(0, Height, 1, -1)
+        .parent()
+        .g('pad').transform(Pad, Pad)
         .rectangle(0, 0, Width, Height).set({fill: 'none', stroke: '#d0d0d0'})
         .parent()
         // initially: x - not inverted ; y - inverted
-        .g('chart').transform(0, Height, 1, -1);
+        .g('chart').transform(0, Height, 1, -1)
+        .g('grid').parent();
 }
 
 
@@ -353,10 +409,11 @@ function getEquidistant(x0, x1, n) {
 var B = document.querySelector('body');
 B.onload = function() {
     let xs = getEquidistant(-100, 200, 20);
-    let ys = xs.map(x => x*x/(30));
-    (new Chart('chart', 800, 600))
+    (new Chart('root', 800, 600))
         .child(B)
-        .data(xs.map(x => x/10), ys)
+        .data(xs.map(x => x/10), xs.map(x => x*x/(30)))
         .data(xs, x => x*2, {type: 'dot'})
+        .data((function*(){yield -50;yield -10; yield 50;})(), x => x*(-2), {type: 'line'})
+        .grid()
         .show();
 };
