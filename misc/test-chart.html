@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <title>test chart</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></meta>
+        <script src='../js/math.js' charset='utf-8'></script>
+        <script src='../js/doc.js' charset='utf-8'></script>
+        <script src='../js/svg.js' charset='utf-8'></script>
+        <script src='../js/chart.js' charset='utf-8'></script>
+        <script src='test-chart.js' charset='utf-8'></script>
+    </head>
+
+    <style>
+#center,#right {
+    float: left;
+}
+svg {
+    padding: 10px;
+}
+svg path {
+    fill: none;
+}
+    </style>
+    <body onload="start();">
+
+<div id='content'>
+
+    <div id='center'>
+        <!-- TODO: reset sizes in js -->
+        <svg
+            id="map"
+            width="560"
+            height="460"
+            version="1.1"
+            viewBox="0 0 560 460"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink">
+        </svg>
+
+    </div>
+
+
+    <div id="right">
+        <ul id="options">
+            <li>
+                <a href="#" onclick="cleanup();">
+                    <span>очистить</span>
+                </a>
+            </li>
+            <!-- y = f(x)-->
+            <li>y = f(x)</li>
+            <li>
+                <span class='label'>f(x) = </span>
+                <textarea id="function" spellcheck="false" rows="5" cols="30"
+                    style='width:200px; height:50px; display:block;'>x
+                </textarea>
+                <!--input type="text" id='function' name="function"
+                        list="functionslist">
+                <datalist id="functionslist">
+                    <option value="x"></option>
+                    <option value="Math.sin(x)"></option>
+                    <option value="Math.exp(x)"></option>
+                    <option value="/*Sinus in degrees*/ Math.sin(Math.PI/180*x)"></option>
+                </datalist-->
+            </li>
+            <li>
+                <span class='label'>x = [</span>
+                <input type='text' id='x0' value='0' style='width:40px'></input>
+                <span class='label'>,</span>
+                <input type='text' id='x1' value='10' style='width:40px'></input>
+                <span class='label'>]</span>
+            </li>
+            <li>
+                <input type="text" id='count' style='width:40px'></input>
+                <span class='label'>точек</span>
+            </li>
+            <li>
+                <a href="#" onclick="drawFunction();">
+                    <span>построить y = f(x)</span>
+                </a>
+            </li>
+            <li>
+                <span class='label'>&nbsp;</span>
+            </li>
+            <!-- y = f(x)-->
+            <li>x = f(t); y = g(t);</li>
+            <li>
+                <span class='label'>x(t) = </span>
+                <textarea id="function-x-t" rows="5" cols="30" spellcheck="false"
+                    style='width:200px; height:50px; display:block;'>2*t
+                </textarea>
+                <span class='label'>y(t) = </span>
+                <textarea id="function-y-t" rows="5" cols="30" spellcheck="false"
+                    style='width:200px; height:50px; display:block;'>3*t
+                </textarea>
+            </li>
+            <li>
+                <span class='label'>t = [</span>
+                <input type='text' id='t0' value='0' style='width:40px'></input>
+                <span class='label'>,</span>
+                <input type='text' id='t1' value='10' style='width:40px'></input>
+                <span class='label'>]</span>
+            </li>
+            <li>
+                <input type="text" id='count-t' style='width:40px' value='10'></input>
+                <span class='label'>точек</span>
+            </li>
+            <li>
+                <a href="#" onclick="drawParametricFunction();">
+                    <span>построить x(t) y(t)</span>
+                </a>
+            </li>
+        </ul>
+
+    </div>
+
+</div>
+    </body>
+
+</html>
