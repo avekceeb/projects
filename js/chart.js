@@ -3,8 +3,7 @@
 
 function Chart(id, w, h, type) {
 
-    var Type = 'xy', // xy | polar
-        XInverted = false,
+    var XInverted = false,
         YInverted = true,
         Pad = 30, // px
         Sx = 1, Sy = 1,
@@ -58,15 +57,14 @@ function Chart(id, w, h, type) {
         } else {
             throw 'Bad Y series!'
         }
+        if (typeof attrs === 'object') {
+            Object.assign(this, attrs);
+        }
         // TODO: if xs.length > ys.length
         this.x0 = Math.min.apply(null, this.xs);
         this.x1 = Math.max.apply(null, this.xs);
         this.y0 = Math.min.apply(null, this.ys);
         this.y1 = Math.max.apply(null, this.ys);
-        // TODO
-        if (typeof attrs === 'object') {
-            Object.assign(this, attrs);
-        }
     }
 
     function ticks(x0, x1) {
@@ -93,7 +91,6 @@ function Chart(id, w, h, type) {
             Y1 = 0;
             return;
         }
-        // TODO: polar ???
         // find ranges for X and Y
         X0 = Data[0].x0;
         X1 = Data[0].x1;
@@ -124,15 +121,16 @@ function Chart(id, w, h, type) {
     }
 
     this.grid = function(type) {
-        // TODO : set type
+        // polar | log
+        type = type | 'cartesian';
         GridX = true;
         GridY = true;
         return this;
     }
 
     this.nogrid = function() {
-        GridX = false;
-        GridY = false;
+        GridX = '';
+        GridY = '';
         return this;
     }
 
@@ -146,6 +144,7 @@ function Chart(id, w, h, type) {
         }
         // draw grid
         if (GridX && GridY) {
+            // TODO: polar | log
             let grid = Chart.g('grid');
             let tick = Root.g('ticks');
             for (let t of ticks(X0, X1)) {
@@ -158,8 +157,8 @@ function Chart(id, w, h, type) {
             for (let t of ticks(Y0, Y1)) {
                 grid.hline(X2P(X0), Y2P(t), X2P(X1-X0))
                     .set({stroke: '#d0d0d0', fill: 'none'});
-                // TODO: is it a more sane way???
-                tick.text(X2P(X0), Y2P(Y0)-Height*(t-Y0)/(Y1-Y0), t)
+                // TODO: is there a more sane way???
+                tick.text(X2P(X0), Y2P(2*Y0-t), t)
                     .set('font-size', '14px');
             }
         }

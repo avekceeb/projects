@@ -15,6 +15,12 @@ function docEl(selector) {
     return document.querySelector(selector);
 }
 
+function docSet(selector, value) {
+    let e = docEl(selector);
+    if (e)
+        e.setAttribute('value', value);
+}
+
 function docInt(selector) {
     return parseInt(docEl(selector).value);
 }
