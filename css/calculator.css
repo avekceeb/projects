@@ -1,0 +1,114 @@
+:focus { outline: none; }
+
+body {
+    margin: 10px;
+    font-family: monospace;
+}
+
+textarea {
+   resize: none;
+   font-size: 20px;
+   color: red;
+   padding: 5px 5px 5px 10px;
+   display: block;
+   width: 200px;
+   height: 60px;
+   border: solid 1px #d0d0d0;
+}
+
+input[type=text] {
+   font-size: 20px;
+   color: cadetblue;
+}
+
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+.tab button {
+  background-color: inherit;
+  float: right;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+.tab button:hover {
+  background-color: #ddd;
+}
+
+.tab button.active {
+  background-color: #ccc;
+}
+
+.tabcontent {
+    display: none;
+    padding: 0;
+    border: 1px solid #ccc;
+    margin: 10px auto;
+}
+
+.tabcontent h2 {
+    background-color: #f0f0f0;
+    padding: 5px;
+    margin: 0;
+    font-size: 16px;
+    font-family: monospace;
+    font-weight: normal;
+}
+
+ul.options {
+    text-align: left;
+    list-style: outside none none;
+}
+
+ul.options li {
+    list-style-type: none;
+    display: block;
+    padding: 5px 0 0 0;
+    margin: 0;
+}
+
+svg path {
+    fill: none;
+}
+
+#univariate-tab {
+    /* initially active */
+    display: block;
+}
+
+
+#content {
+    /* width: 880px;
+    margin: auto;
+    min-width: 880px; */
+    text-align: center;
+    border: solid 1px #d0d0d0;
+    border-top: none;
+}
+
+#drawing-area {
+    /* float: left; */
+    display: inline-block;
+    vertical-align: top;
+    width: 530px;
+    min-width: 500px;
+}
+
+#input-area {
+    /* float: left; */
+    display: inline-block;
+    vertical-align: top;
+    width: 350px;
+    min-width: 350px;
+}
+
+#map {
+    /*border: solid 1px #d0d0d0;*/
+    margin: 20px 20px 0 0;
+}

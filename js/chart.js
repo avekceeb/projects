@@ -186,6 +186,7 @@ function Chart(id, w, h, type) {
     this.cleanup = function() {
         this.nodata();
         this.show();
+	return this;
     }
 
     this.child = function(parent) {
