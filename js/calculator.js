@@ -125,7 +125,7 @@ function translateAngular(hour, degree, hms, dms) {
     if (hms == null)
         elHms.value = formatHMS(h, hm, hs);
 
-    drawHorizontal();
+    drawHorizontal(deg);
 
 }
 
@@ -186,7 +186,7 @@ function drawParametricFunction() {
         .show();
 }
 
-function drawHorizontal() {
+function drawHorizontal(degrees) {
     let radius = 10;
     // TODO: as grid:
     chart.cleanup().nogrid();
@@ -197,22 +197,42 @@ function drawHorizontal() {
     // горизонтальная сетка
     for (var t=0; t<=180; t+=15) {
         let xs = [], ys = [];
-        for (var f=90; f<=270; f+=5) {
+        for (var f=0; f<=180; f+=5) {
             [x,y,z] = sphericalToCartesian(t, f, radius);
-            xs.push(y);
+            xs.push(x);
             ys.push(z);
         }
         chart.data(xs, ys, {type:'line', color:'#d0d0d0'});
     }
     // вертикальная сетка
-    for (var f=90; f<=270; f+=15) {
+    for (var f=0; f<=180; f+=15) {
         let xs = [], ys = [];
         for (var t=0; t<=180; t+=5) {
             [x,y,z] = sphericalToCartesian(t, f, radius);
-            xs.push(y);
+            xs.push(x);
             ys.push(z);
         }
         chart.data(xs, ys, {type:'line', color:'#d0d0d0'});
+    }
+    if (typeof degrees === 'number') {
+        dbg(degrees);
+        degrees += 90;
+        degrees %= 180;
+        degrees = -degrees;
+        let xs = [], ys = [];
+        for (var f=0; f<=180; f+=15) {
+            [x,y,z] = sphericalToCartesian(degrees, f, radius);
+            xs.push(x);
+            ys.push(z);
+        }
+        chart.data(xs, ys, {type:'line', color:'#303030'});
+        xs = [], ys = [];
+        for (var t=0; t<=180; t+=5) {
+            [x,y,z] = sphericalToCartesian(t, degrees, radius);
+            xs.push(x);
+            ys.push(z);
+        }
+        chart.data(xs, ys, {type:'line', color:'#303030'});
     }
     chart.show();
 }
