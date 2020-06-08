@@ -5,6 +5,25 @@ var chart;
 
 function start() {
     chart = new Chart('map', 500, 400);
+    // reset univariate
+    docSet('#function', 'sin(x)*cos(2*x)').focus();
+    docSet('#x0', '-360');
+    docSet('#x1', '180');
+    docSet('#count', '100');
+    drawFunction();
+    // reset parametric
+    docSet('#function-x-t', 'sin(2*t)').focus();
+    docSet('#function-y-t', 'sin(3*t)');
+    docSet('#t0', '0');
+    docSet('#t1', '360');
+    docSet('#count-t', '100');
+    // reset polar
+    docSet('#f0', '0');
+    docSet('#f1', 360);
+    docSet('#count-f', '100'),
+    docEl('#f-series-type', 'cos(4*f)').focus();
+    // reset angular
+    docSet('#hms', '0h 0m 0s').focus();
 }
 
 
@@ -20,24 +39,11 @@ function showTab(evt, tab) {
     }
     document.getElementById(tab).style.display = "block";
     evt.currentTarget.className += " active";
-    if (tab == 'angular-tab') {
-        drawHorizontal();
-        docSet('#hms', '0h 0m 0s').focus();
-    }
-    if (tab == 'parametric-tab') {
-        docSet('#function-x-t', 'sin(2*t)').focus();
-        docSet('#function-y-t', 'sin(3*t)');
-        docSet('#t0', '0');
-        docSet('#t1', '360');
-        docSet('#count-t', '100');
-        drawParametricFunction();
-    }
-    if (tab == 'univariate-tab') {
-        docSet('#function', 'sin(x)*cos(2*x)').focus();
-        docSet('#x0', '-360');
-        docSet('#x1', '180');
-        docSet('#count', '100');
-        drawFunction();
+    switch (tab) {
+        case 'angular-tab': drawHorizontal(); break;
+        case 'parametric-tab': drawParametricFunction(); break;
+        case 'univariate-tab': drawFunction(); break;
+        case 'polar-tab': drawPolarFunction(); break;
     }
 }
 
@@ -158,7 +164,8 @@ function drawPolarFunction() {
         xs.push(radius * cos(angle));
         ys.push(radius * sin(angle));
     }
-    chart.cleanup().grid().data(xs, ys).show();
+    chart.cleanup().grid().data(xs, ys,
+        {'type':t.options[t.selectedIndex].value}).show();
 }
 
 
