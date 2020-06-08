@@ -22,15 +22,22 @@ function showTab(evt, tab) {
     evt.currentTarget.className += " active";
     if (tab == 'angular-tab') {
         drawHorizontal();
-	docEl('#hms').focus();
+        docSet('#hms', '0h 0m 0s').focus();
     }
     if (tab == 'parametric-tab') {
-        drawHorizontal();
-	docEl('#function-x-t').focus();
+        docSet('#function-x-t', 'sin(2*t)').focus();
+        docSet('#function-y-t', 'sin(3*t)');
+        docSet('#t0', '0');
+        docSet('#t1', '360');
+        docSet('#count-t', '100');
+        drawParametricFunction();
     }
     if (tab == 'univariate-tab') {
-        drawHorizontal();
-	docEl('#function').focus();
+        docSet('#function', 'sin(x)*cos(2*x)').focus();
+        docSet('#x0', '-360');
+        docSet('#x1', '180');
+        docSet('#count', '100');
+        drawFunction();
     }
 }
 
@@ -121,31 +128,37 @@ function drawFunction() {
     var x0 = docFloat('#x0');
     var x1 = docFloat('#x1');
     var n = docInt('#count');
-    var f = docFunction('#function', 'x');
-    if (typeof(f) !== 'function') {
-        // TODO
-        alert("Error: invalid function!");
+    let t = docEl('#series-type');
+    try {
+        var f = docFunction('#function', 'x');
+        chart.cleanup().grid().data(
+            getEquidistant(x0, x1, n), f,
+                {'type':t.options[t.selectedIndex].value})
+            .show();
+    } catch (e) {
         return;
     }
-    chart.grid().data(getEquidistant(x0, x1, n), f).show();
 }
 
 
 function drawPolarFunction() {
-    let x0 = docFloat('#x0'),
-        x1 = docFloat('#x1'),
-        n = docInt('#count'),
-        f = docFunction('#function', 'x');
-    if (typeof(f) !== 'function') {
-        throw ("Error: invalid function!");
+    let f0 = docFloat('#f0'),
+        f1 = docFloat('#f1'),
+        n = docInt('#count-f'),
+        t = docEl('#f-series-type'),
+        f;
+    try {
+        f = docFunction('#function-r-f', 'f');
+    } catch (e) {
+        return;
     }
     let xs = [], ys = [], radius;
-    for (let angle of getEquidistant(x0, x1, n)) {
+    for (let angle of getEquidistant(f0, f1, n)) {
         radius = f(angle);
         xs.push(radius * cos(angle));
         ys.push(radius * sin(angle));
     }
-    chart.grid().data(xs, ys).show();
+    chart.cleanup().grid().data(xs, ys).show();
 }
 
 
@@ -159,8 +172,11 @@ function drawParametricFunction() {
     var t0 = docFloat("#t0");
     var t1 = docFloat("#t1");
     var n = docInt("#count-t");
+    let t = docEl('#t-series-type');
     var ts = getEquidistant(t0, t1, n);
-    chart.grid().data(ts.map(xt), ts.map(yt)).show();
+    chart.cleanup().grid().data(
+        ts.map(xt), ts.map(yt), {'type':t.options[t.selectedIndex].value})
+        .show();
 }
 
 function drawHorizontal() {
@@ -210,4 +226,3 @@ function cleanup() {
 //             transform: 'rotate('+a+')'});
 //     }
 // }
-

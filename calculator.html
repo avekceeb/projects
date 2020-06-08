@@ -17,6 +17,7 @@
         <button class="tablinks" onclick="cleanup()">очистить</button>
         <button class="tablinks active" onclick="showTab(event, 'univariate-tab')">y = f(x)</button>
         <button class="tablinks" onclick="showTab(event, 'parametric-tab')">x(t) y(t)</button>
+        <button class="tablinks" onclick="showTab(event, 'polar-tab')">&rho;(&phi;)</button>
         <button class="tablinks" onclick="showTab(event, 'angular-tab')">углы</button>
     </div>
 
@@ -42,44 +43,42 @@
             <h2>Задать аналитически</h2>
                 <ul class="options">
                 <li>
-                    <a href="#" onclick="cleanup();">
-                        <span>очистить</span>
-                    </a>
-                </li>
-                <!-- y = f(x)-->
-                <li>y = f(x)</li>
-                <li>
-                    <span class='label'>f(x) = </span>
-                    <textarea id="function" spellcheck="false" rows="5" cols="30">x</textarea>
-                    <!--input type="text" id='function' name="function"
-                            list="functionslist">
-                    <datalist id="functionslist">
-                        <option value="x"></option>
-                        <option value="Math.sin(x)"></option>
-                        <option value="Math.exp(x)"></option>
-                        <option value="/*Sinus in degrees*/ Math.sin(Math.PI/180*x)"></option>
-                    </datalist-->
+                    <textarea id="function"
+                        spellcheck="false"
+                        rows="5"
+                        cols="30"
+                        tabstop="1"
+                        oninput="drawFunction()">x</textarea>
                 </li>
                 <li>
-                    <span class='label'>x = [</span>
-                    <input type='text' id='x0' value='0' style='width:40px'></input>
-                    <span class='label'>,</span>
-                    <input type='text' id='x1' value='10' style='width:40px'></input>
-                    <span class='label'>]</span>
+                    <span class='label'>x = от</span>
+                    <input type='text'
+                        id='x0'
+                        value='0'
+                        style='width:4em'
+                        oninput="drawFunction()"></input>
+                    <span class='label'>до</span>
+                    <input type='text'
+                        id='x1'
+                        value='10'
+                        style='width:4em'
+                        oninput="drawFunction()"></input>
                 </li>
                 <li>
-                    <input type="text" id='count' style='width:40px'></input>
+                    <input type="text"
+                        id='count'
+                        value='10'
+                        style='width:3em'
+                        oninput="drawFunction()"></input>
                     <span class='label'>точек</span>
                 </li>
                 <li>
-                    <a href="#" onclick="drawFunction();">
-                        <span>построить y = f(x)</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="drawPolarFuncti, 800, 6on();">
-                        <span>построить в полярных</span>
-                    </a>
+                    <select id="series-type" onchange="drawFunction()">
+                        <option>line</option>
+                        <option>dot</option>
+                        <option>line-dot</option>
+                        <option>line-dot-tip</option>
+                    </select>
                 </li>
             </ul>
         </div>
@@ -89,15 +88,20 @@
             <h2>Задать параметрически</h2>
             <ul class="options">
                 <li>
-                    <span class='label'>&nbsp;</span>
-                </li>
-                <!-- y = f(x)-->
-                <li>x = f(t); y = g(t);</li>
-                <li>
                     <span class='label'>x(t) = </span>
-                    <textarea id="function-x-t" rows="5" cols="30" spellcheck="false">2*t</textarea>
+                    <textarea id="function-x-t"
+                        rows="5"
+                        cols="30"
+                        oninput="drawParametricFunction()"
+                        spellcheck="false">2*t</textarea>
+                </li>
+                <li>
                     <span class='label'>y(t) = </span>
-                    <textarea id="function-y-t" rows="5" cols="30" spellcheck="false"
+                    <textarea id="function-y-t"
+                        rows="5"
+                        cols="30"
+                        spellcheck="false"
+                        oninput="drawParametricFunction()"
                         style='width:200px; height:50px; display:block;'>3*t
                     </textarea>
                 </li>
@@ -113,31 +117,72 @@
                     <span class='label'>точек</span>
                 </li>
                 <li>
-                    <a href="#" onclick="drawParametricFunction();">
-                        <span>построить x(t) y(t)</span>
-                    </a>
+                    <select id="t-series-type" onchange="drawParametricFunction()">
+                        <option>line</option>
+                        <option>dot</option>
+                        <option>line-dot</option>
+                        <option>line-dot-tip</option>
+                    </select>
                 </li>
             </ul>
         </div>
 
+        <div id="polar-tab" class="tabcontent">
+            <h2>Задать в полярных координатах</h2>
+            <ul class="options">
+                <li>
+                    <textarea id="function-r-f"
+                        rows="5"
+                        cols="30"
+                        oninput="drawPolarFunction()"
+                        spellcheck="false">2*f</textarea>
+                </li>
+                <li>
+                    <span class='label'>f от</span>
+                    <input type='text' id='f0' value='0' style='width:40px'></input>
+                    <span class='label'>до</span>
+                    <input type='text' id='f1' value='10' style='width:40px'></input>
+                </li>
+                <li>
+                    <input type="text" id='count-f' style='width:40px' value='10'></input>
+                    <span class='label'>точек</span>
+                </li>
+                <li>
+                    <select id="f-series-type" onchange="drawPolarFunction()">
+                        <option>line</option>
+                        <option>dot</option>
+                        <option>line-dot</option>
+                        <option>line-dot-tip</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
 
     <div id="angular-tab" class="tabcontent">
         <h2>Перевод углов</h2>
         <table id="angulars" style="margin:auto;">
             <tr>
-                <td><input type='text' id='hms' value='0' style='width:120px'
+                <td><input type='text'
+                    id='hms'
+                    value='0'
                     oninput='translateAngular(null, null, this.value, null);'/></td>
             </tr>
             <tr>
-                <td><input type='text' id='hours' value='0' style='width:120px'
+                <td><input type='text'
+                    id='hours'
+                    value='0'
                     oninput='translateAngular(this.value, null, null, null);'/></td>
             </tr>
             <tr>
-                <td><input type='text' id='dms' value='0' style='width:120px'
+                <td><input type='text'
+                    id='dms'
+                    value='0'
                     oninput='translateAngular(null, null, null, this.value);'/></td>
             </tr>
             <tr>
-                <td><input type='text' id='degrees' value='0' style='width:120px'
+                <td><input type='text'
+                    id='degrees'
+                    value='0'
                     oninput='translateAngular(null, this.value, null, null);'/></td>
             </tr>
         </table>

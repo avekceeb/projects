@@ -1,14 +1,31 @@
 @font-face {
   font-family: Raleway;
-  src: url(fonts/Raleway-Regular.ttf);
+  src: url(../fonts/Raleway-Regular.ttf);
 }
 
 @font-face {
   font-family: TeX;
-  src: url(fonts/texgyreschola-regular.otf) format("opentype");
+  src: url(../fonts/texgyreschola-regular.otf) format("opentype");
   /*font-style: italic;*/
 }
 
+@font-face {
+  font-family: Droid;
+  src: url(../fonts/DroidSansMono.ttf);
+  /*font-style: italic;*/
+}
+
+@font-face {
+  font-family: Erika;
+  src: url(../fonts/ErikaType.ttf);
+  /*font-style: italic;*/
+}
+
+@font-face {
+  font-family: Ubuntu;
+  src: url(../fonts/UbuntuMono-R.ttf);
+  /*font-style: italic;*/
+}
 
 #date, #date-utc, #date-julian, #gst {
     font-size: 30px;
@@ -16,10 +33,31 @@
     margin: auto;
     text-align: center;
     padding: 20px 0 0 0;
-    font-family: Raleway;
+    font-family: Ubuntu;
 }
 
+a, a:visited {
+    color: #808080;
+    text-decoration: none;
+}
 
+a:hover {
+    color: #bc8f8f;
+    text-decoration: underline;
+}
+
+ul.links {
+    padding: 0;
+    text-align: left;
+    list-style: outside none none;
+}
+
+ul.links li {
+    list-style-type: none;
+    display: block;
+    padding: 5px 0 0 0;
+    margin: 0;
+}
 
 
 #calendar {
@@ -28,7 +66,7 @@
     left: 10px;
     font-size: 12px;
     color: #d0d0d0;
-    font-family: TeX;
+    font-family: Erika;
 }
 
 #calendar td {

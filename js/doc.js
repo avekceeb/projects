@@ -17,8 +17,14 @@ function docEl(selector) {
 
 function docSet(selector, value) {
     let e = docEl(selector);
-    if (e)
-        e.setAttribute('value', value);
+    //dbg(e.tagName, e.nodeName);
+    if (e) {
+        if ('TEXTAREA' === e.tagName)
+            e.innerHTML = value;
+        else
+            e.setAttribute('value', value);
+    }
+    return e;
 }
 
 function docInt(selector) {

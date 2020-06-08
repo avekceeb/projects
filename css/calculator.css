@@ -1,40 +1,80 @@
+@font-face {
+    font-family: Raleway;
+    src: url(../fonts/Raleway-Regular.ttf);
+}
+
+@font-face {
+    font-family: TeX;
+    src: url(../fonts/texgyreschola-regular.otf) format("opentype");
+}
+
+@font-face {
+    font-family: Droid;
+    src: url(../fonts/DroidSansMono.ttf);
+}
+
+@font-face {
+    font-family: Erika;
+    src: url(../fonts/ErikaType.ttf);
+}
+
+@font-face {
+    font-family: Ubuntu;
+    src: url(../fonts/UbuntuMono-R.ttf);
+}
+
 :focus { outline: none; }
 
 body {
     margin: 10px;
-    font-family: monospace;
+    font-family: Ubuntu;
 }
 
 textarea {
-   resize: none;
-   font-size: 20px;
-   color: red;
-   padding: 5px 5px 5px 10px;
-   display: block;
-   width: 200px;
-   height: 60px;
-   border: solid 1px #d0d0d0;
+    resize: none;
+    font-size: 20px;
+    color: #753db7;
+    padding: 10px 5px 5px 10px;
+    display: block;
+    width: 200px;
+    height: 60px;
+    border: solid 1px #d0d0d0;
+    font-family: Erika;
 }
 
 input[type=text] {
-   font-size: 20px;
-   color: cadetblue;
+    font-size: 20px;
+    color: #753db7;
+    font-family: Erika;
+    border: solid 1px #d0d0d0;
+    margin: 10px  0 0 0;
+    padding: 3px;
 }
 
+select {
+    margin: 10px 0 0 0;
+}
+
+
+#angulars input {
+    width: 10em;
+}
+
+
 .tab {
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background-color: #f1f1f1;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
 }
 
 .tab button {
-  background-color: inherit;
-  float: right;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  transition: 0.3s;
+    background-color: inherit;
+    float: right;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
 }
 
 .tab button:hover {
@@ -49,7 +89,7 @@ input[type=text] {
     display: none;
     padding: 0;
     border: 1px solid #ccc;
-    margin: 10px auto;
+    margin: 20px auto;
 }
 
 .tabcontent h2 {
